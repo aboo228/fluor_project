@@ -14,6 +14,15 @@ from EDA import df
 # s = s[s<20]
 # sns.histplot(s)
 # plt.show()
+
+# todo replace 'ND' in None - df['PH'], df['EC']
+
+# df['EC'] = df['EC'].replace(['ND','LEAKED','leakage'],0)
+# unique = unique_pd(df['EC'] )
+
+# ec = df['EC'].astype('float32')
+# ec.describe()
+
 # todo replace 'ND','leakage'  in None - df['TH']
 
 # unique_pd(df['TH'][df['TH'].fillna('ND').str.isalpha()])
@@ -21,5 +30,9 @@ from EDA import df
 # todo fix 'RSC' column, need  to find way to keep negative float numbers
 # list_str_unique_values.drop(series[series.str.contains('-')].index, inplace=True)
 #
+
+# list_str_unique_value = list_str_unique_values.index.to_list()
+
+
 # list_str_unique_value = list_str_unique_values.index.to_list()
 

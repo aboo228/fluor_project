@@ -4,7 +4,7 @@ from func import unique_pd, find_and_replace_not_num_values, isfloat
 import seaborn as sns
 import matplotlib.pyplot as plt
 from tqdm import tqdm
-###
+
 
 path_part_A = r'GWQ_2000-2009 coord corrected_csv.csv'
 df_A = pd.read_csv(path_part_A, low_memory=False)
@@ -42,16 +42,25 @@ df.reset_index(inplace=True)
 
 
 
+
 '''this part we fix the numrical columns'''
 columns = ['PH', 'EC', 'TH',
        'TOT_ALKALINITY', 'CA', 'MG', 'NA', 'K', 'FE', 'CARBONATE',
        'BICARBONATE', 'CHLORIDE', 'SULPHATE', 'NITRATE', 'FLUORIDE', 'SAR',
         'SiO2', 'TDS', 'Turbidity', '%Na', 'Arsenic']
 
+'''this part we fix th'''
+columns = ['PH', 'EC', 'TH',
+       'TOT_ALKALINITY', 'CA', 'MG', 'NA', 'K', 'FE', 'CARBONATE',
+       'BICARBONATE', 'CHLORIDE', 'SULPHATE', 'NITRATE', 'FLUORIDE', 'SAR',
+       'RSC', 'SiO2', 'PO4', 'TDS', 'Turbidity', '%Na', 'Arsenic']
+
+
 
 for col in columns:
     print(col)
     df[col].replace(['-', '<5', '<1', 'B', '*'], None, inplace=True)
+
     df[col], _ = find_and_replace_not_num_values(df[col], replace_to=None, inplace=True, astype=True, lops=True, list_values=True)
 
 col_to_fix = ['LATITUDE', 'LONGITUDE', 'LR. No', 'PO4', 'RSC']
@@ -88,3 +97,22 @@ corr = df_numeric.corr()
 # info = df.count()
 # info.to_excel("info.xlsx")
 
+
+    df[col], _ = find_and_replace_not_num_values(df[col], inplace=True, astype=True, lops=True, list_values=True)
+
+col_to_fix = ['LATITUDE', 'LONGITUDE', 'LR. No']
+
+
+series = df['RSC']
+list_str_unique_values = unique_pd(series[series.str.contains('-', na=False)]).index.to_list()
+list_for_comparison = []
+count = 0
+while len(list_str_unique_values) != list_for_comparison:
+    list_for_comparison = len(list_str_unique_values)
+    try:
+        for i in range(0, len(list_str_unique_values)):
+            # print(list_str_unique_values[i])
+            if isfloat(list_str_unique_values[i]) is True:
+                list_str_unique_values.pop(i)
+    except:
+        'list index out of range'

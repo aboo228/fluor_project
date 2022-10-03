@@ -30,6 +30,7 @@ def isfloat(item):
 
 
 
+
 def unique_pd(series, condition=None, sort_values = True, sort_index=False):
     ''' make Series of unique values and count amaunt of uniqe '''
     if condition is None:
@@ -40,6 +41,13 @@ def unique_pd(series, condition=None, sort_values = True, sort_index=False):
     if sort_index is True:
         unq = unq.sort_index()
     return unq
+
+def unique_pd(series, condition=None):
+    ''' make Series of unique values and count amaunt of uniqe '''
+    if condition is None:
+        condition = series
+    return series.groupby(condition).count()
+
 
 
 def find_and_replace_not_num_values(series, replace_to=0, inplace=False, astype=0, lops=False, list_values=False):
@@ -67,7 +75,9 @@ def find_and_replace_not_num_values(series, replace_to=0, inplace=False, astype=
     return series, list_str_unique_values
 
 
+
 def predict_null(series, predict_func, data):
     for i in range(0, len(series)):
         if list(series[i:i + 1].isna())[0] is True:
             series[i] = predict_func.predict(data[i:i + 1])
+
