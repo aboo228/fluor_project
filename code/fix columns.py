@@ -8,13 +8,12 @@ from EDA import df
 # todo when value = New replace to 1
 # SITE_ID_unique = unique_pd(df['SITE_ID'], df['SITE_ID'])
 
-# todo replace 'ND' in None - df['PH'], df['EC']
+# todo distribution of df['PH']
 
-# df['EC'] = df['EC'].replace(['ND','LEAKED','leakage'],0)
-# unique = unique_pd(df['EC'] )
-
-# ec = df['EC'].astype('float32')
-# ec.describe()
+# s = df['PH'][df['PH']>0]
+# s = s[s<20]
+# sns.histplot(s)
+# plt.show()
 # todo replace 'ND','leakage'  in None - df['TH']
 
 # unique_pd(df['TH'][df['TH'].fillna('ND').str.isalpha()])
@@ -23,3 +22,4 @@ from EDA import df
 # list_str_unique_values.drop(series[series.str.contains('-')].index, inplace=True)
 #
 # list_str_unique_value = list_str_unique_values.index.to_list()
+
