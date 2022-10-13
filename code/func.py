@@ -30,11 +30,16 @@ def isfloat(item):
 
 
 
-def unique_pd(series, condition=None):
+def unique_pd(series, condition=None, sort_values = True, sort_index=False):
     ''' make Series of unique values and count amaunt of uniqe '''
     if condition is None:
         condition = series
-    return series.groupby(condition).count()
+    unq = series.groupby(condition).count()
+    if sort_values is True:
+        unq = unq.sort_values()
+    if sort_index is True:
+        unq = unq.sort_index()
+    return unq
 
 
 def find_and_replace_not_num_values(series, replace_to=0, inplace=False, astype=0, lops=False, list_values=False):

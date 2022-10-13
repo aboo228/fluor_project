@@ -66,8 +66,15 @@ df['PO4'].replace(['<0.01', '<0.1', '<0.10', '<0.11', '<0.12', '<0.13', '<0.14',
 df['PO4'] = df['PO4'].astype('float32')
 
 
+'''df ready to fill null '''
+df_r = df.copy()
+df_r.to_csv('df_r.csv', index=False)
+
 '''now we can look statistical numeric columns'''
-describe = df.loc[:, 'PH':'Arsenic'].describe()
+df_numeric = df.loc[:, 'PH':'Arsenic']
+
+describe = df_numeric.describe()
+corr = df_numeric.corr()
 
 '''this part make histplot for all column'''
 # cols = ['PH', 'EC', 'TH',
@@ -81,33 +88,6 @@ describe = df.loc[:, 'PH':'Arsenic'].describe()
 # info = df.count()
 # info.to_excel("info.xlsx")
 
-# df_numeric = df.loc[:, 'PH':'Arsenic']
-# df_numeric.corr()
 
 
-import sklearn
-from sklearn.model_selection import GridSearchCV
-from sklearn.ensemble import AdaBoostClassifier
-from sklearn.ensemble import GradientBoostingClassifier
-from sklearn.ensemble import RandomForestClassifier
-from sklearn.model_selection import train_test_split
-df_test = df.copy()
 
-df_test = df.loc[:, ['FLUORIDE', 'PH', 'EC', 'CA', 'MG', 'NA', 'K', 'FE', 'CARBONATE']]
-df_test = df_test.fillna(0)
-# df_test = pd.DataFrame(np.nan_to_num(df_test), columns =['FLUORIDE','PH'] )
-X = df_test.loc[:, ['PH', 'EC', 'CA', 'MG', 'NA', 'K', 'FE', 'CARBONATE']]
-y = df_test['FLUORIDE']
-param = 0.5
-y[y > 0.7] = 1
-y[y <= 0.7] = 0
-
-
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2 )
-
-clf = GradientBoostingClassifier(n_estimators=100, learning_rate=1.0, max_depth=1, random_state=0).fit(X_train, y_train)
-# clf = RandomForestClassifier(max_depth=2, random_state=0).fit(X_train, y_train)
-
-print(clf.score(X_test, y_test))
-a = clf.predict(X_test)
-unique_pd(pd.Series(a))
