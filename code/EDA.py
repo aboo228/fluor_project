@@ -68,7 +68,7 @@ df['PO4'] = df['PO4'].astype('float32')
 
 '''df ready to fill null '''
 df_r = df.copy()
-df_r.to_csv('df_r.csv', index=False)
+df_r.to_csv('df_.csv', index=False)
 
 '''now we can look statistical numeric columns'''
 df_numeric = df.loc[:, 'PH':'Arsenic']
@@ -87,7 +87,4 @@ corr = df_numeric.corr()
 
 # info = df.count()
 # info.to_excel("info.xlsx")
-
-
-
 

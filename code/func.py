@@ -65,3 +65,9 @@ def find_and_replace_not_num_values(series, replace_to=0, inplace=False, astype=
     if list_values is True:
         print(f'list string unique values is: {list_str_unique_values}')
     return series, list_str_unique_values
+
+
+def predict_null(series, predict_func, data):
+    for i in range(0, len(series)):
+        if list(series[i:i + 1].isna())[0] is True:
+            series[i] = predict_func.predict(data[i:i + 1])
