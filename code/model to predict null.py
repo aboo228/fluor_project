@@ -14,6 +14,7 @@ data = pd.read_csv(path, low_memory=False)
 
 ##################
 def test():
+    print('d')
     pass
 
 df_num = data.loc[:, ['FLUORIDE', 'PH', 'EC', 'CA', 'NA', 'CHLORIDE', 'TH', 'BICARBONATE', 'NITRATE', 'FE', 'RSC', 'TOT_ALKALINITY', 'CARBONATE', 'SAR', 'SULPHATE', 'K', 'TDS', 'SiO2', 'Arsenic', 'PO4']]
