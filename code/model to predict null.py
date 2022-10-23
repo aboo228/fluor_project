@@ -25,15 +25,44 @@ class PredictNull:
         self.series = series
         self.y = self.df[series]
         self.X_train, self.X_test, self.y_train, self.y_test = train_test_split(self.X, self.y, test_size=0.2)
+        self.model = None
+        self.regressor = None
+        self.prediction = None
 
-    def predict(self, regressor):
-        print(f'predict { self.series}')
-        self.regressor = regressor
+
+    def grid_search_cv(self, model, parameters, predict=True):
+
+        print(f'start GridSearchCV {self.series} column in {model}')
+        self.model = model
+
+        if model == 'GradientBoostingRegressor':
+            model = GradientBoostingRegressor(random_state=0)
+
+        elif model == 'AdaBoostRegressor':
+            model = AdaBoostRegressor(random_state=0)
+
+        elif model == 'RandomForestRegressor':
+            model = RandomForestRegressor(random_state=0)
+
+        self.regressor = GridSearchCV(model, parameters)
+        self.regressor.fit(self.X_train, self.y_train)
+        print(f'best_params for {self.series} column in {self.model} {self.regressor.best_params_}')
+
+        if predict == True:
+            self.predict()
+
+        return model
+
+    def predict(self):
+        print(f'prediction of { self.series} {self.model}')
         print(self.regressor.score(self.X_test, self.y_test))
         self.prediction = self.regressor.predict(self.X_test)
         unique_pd(pd.Series(self.prediction))
+        print(self.prediction)
+
+        ####for classification
         self.unq = unique_pd(pd.Series(self.prediction))
-        print(self.unq)
+
 
     def fill_null(self):
         for i in tqdm(range(0, len(self.y))):
@@ -43,32 +72,7 @@ class PredictNull:
         self.df_1.to_csv(f'df_fill_{self.series}.csv', index=False)
 
 
-
-
-# df_num = df_num.fillna(0)
-# # df_num = pd.DataFrame(np.nan_to_num(df_num), columns =['FLUORIDE','PH'] )
-# X = df_num.loc[:, ['PH', 'FLUORIDE', 'CA', 'NA', 'CHLORIDE', 'TH', 'BICARBONATE', 'NITRATE', 'FE', 'RSC', 'TOT_ALKALINITY', 'CARBONATE', 'SAR', 'SULPHATE', 'K', 'TDS', 'SiO2', 'Arsenic', 'PO4']]
-# y = df_num['EC']
-#
-#
-# X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2)
-#
-#
-# '''Gradient Boosting Regressor to df['EC'] '''
-# print('start')
-# # GradientBoosting = GradientBoostingRegressor(n_estimators=80, learning_rate=0.1, random_state=0)
-# # parameters = {'max_depth':(1, 2, 3, 4, 5), 'learning_rate':(0.5, 0.1, 0.05, 0.01), 'n_estimators':(60, 70, 75, 80, 85, 90 ,100)}
-# # clf = GridSearchCV(GradientBoosting, parameters)
-# clf = GradientBoostingRegressor(n_estimators=85, learning_rate=0.05, max_depth=4, random_state=42)
-# clf.fit(X_train, y_train)
-#
-# print(clf.score(X_test, y_test))
-# prediction = clf.predict(X_test)
-# unique_pd(pd.Series(prediction))
-# unq = unique_pd(pd.Series(prediction))
-# print(unq)
-#
-# '''clf.best_params_:GradientBoostingRegressor, {'learning_rate': 0.05, 'max_depth': 4, 'n_estimators': 85}'''
+# '''EC column : clf.best_params_:GradientBoostingRegressor, {'learning_rate': 0.05, 'max_depth': 4, 'n_estimators': 85}'''
 #
 # for i in range(0, len(df_num['EC'])):
 #     if list(df_num['EC'][i:i+1].isna())[0] is True:
@@ -87,110 +91,60 @@ if __name__ == '__main__':
 
     # ph_fill = PredictNull(series='PH', df=df_num)
     #
-    # print('start')
-    # GradientBoosting = GradientBoostingRegressor(random_state=0)
     # parameters = {'max_depth': (1, 2, 3, 4, 5), 'learning_rate': (0.5, 0.1, 0.05, 0.01), 'n_estimators': (60, 70, 75, 80, 85, 90, 100)}
-    # clf_gb = GridSearchCV(GradientBoosting, parameters)
-    # clf_gb.fit(ph_fill.X_train, ph_fill.y_train)
-    # ph_fill.predict(clf_gb)
+    # ph_reg_gb = ph_fill.grid_search_cv('GradientBoostingRegressor', parameters, predict=True)
     #
-    # AdaBoostRegressor = AdaBoostRegressor(random_state=0)
-    # parameters = { 'learning_rate': (0.5, 0.1, 0.05, 0.01), 'n_estimators': (60, 70, 75, 80, 85, 90, 100)}
-    # clf_ab = GridSearchCV(GradientBoosting, parameters)
-    # clf_ab.fit(ph_fill.X_train, ph_fill.y_train)
-    # ph_fill.predict(clf_ab)
+    # parameters = {'learning_rate': (0.5, 0.1, 0.05, 0.01), 'n_estimators': (60, 70, 75, 80, 85, 90, 100)}
+    # ph_reg_ab = ph_fill.grid_search_cv('AdaBoostRegressor', parameters, predict=True)
     #
-    # RandomForestRegressor = RandomForestRegressor(random_state=0)
     # parameters = {'max_depth': (1, 2, 3, 4, 5), 'n_estimators': (60, 70, 75, 80, 85, 90, 100)}
-    # clf_rf = GridSearchCV(GradientBoosting, parameters)
-    # clf_rf.fit(ph_fill.X_train, ph_fill.y_train)
-    # ph_fill.predict(clf_rf)
-
-    # clf = GradientBoostingRegressor(n_estimators=85, learning_rate=0.05, max_depth=4, random_state=42)
-    # clf = AdaBoostRegressor(n_estimators=85, learning_rate=0.05, random_state=42)
-    # clf = RandomForestRegressor(n_estimators=85, max_depth=4, random_state=42)
-
-
-    # clf.fit(ph_fill.X_train, ph_fill.y_train)
-    # self.predict(clf)
-
-
-    '''Gradient Boosting Regressor to df['EC'] '''
-
+    # ph_reg_rf = ph_fill.grid_search_cv('RandomForestRegressor', parameters, predict=True)
+    #
+    #
+    #
+    # '''Gradient Boosting Regressor to df['EC'] '''
+    #
     # ec_fill = PredictNull(series='EC', df=df_num)
     #
-    # print('start')
-    # GradientBoosting = GradientBoostingRegressor(random_state=0)
     # parameters = {'max_depth': (1, 2, 3, 4, 5), 'learning_rate': (0.5, 0.1, 0.05, 0.01), 'n_estimators': (60, 70, 75, 80, 85, 90, 100)}
-    # clf_gb = GridSearchCV(GradientBoosting, parameters)
-    # clf_gb.fit(ec_fill.X_train, ec_fill.y_train)
-    # ec_fill.predict(clf_gb)
+    # ec_reg_gb = ec_fill.grid_search_cv('GradientBoostingRegressor', parameters, predict=True)
     #
-    # AdaBoostRegressor = AdaBoostRegressor(random_state=0)
-    # parameters = { 'learning_rate': (0.5, 0.1, 0.05, 0.01), 'n_estimators': (60, 70, 75, 80, 85, 90, 100)}
-    # clf_ab = GridSearchCV(GradientBoosting, parameters)
-    # clf_ab.fit(ec_fill.X_train, ec_fill.y_train)
-    # ec_fill.predict(clf_ab)
+    # parameters = {'learning_rate': (0.5, 0.1, 0.05, 0.01), 'n_estimators': (60, 70, 75, 80, 85, 90, 100)}
+    # ec_reg_ab = ec_fill.grid_search_cv('AdaBoostRegressor', parameters, predict=True)
     #
-    # RandomForestRegressor = RandomForestRegressor(random_state=0)
     # parameters = {'max_depth': (1, 2, 3, 4, 5), 'n_estimators': (60, 70, 75, 80, 85, 90, 100)}
-    # clf_rf = GridSearchCV(GradientBoosting, parameters)
-    # clf_rf.fit(ec_fill.X_train, ec_fill.y_train)
-    # ec_fill.predict(clf_rf)
-
-    '''Gradient Boosting Regressor to df['CHLORIDE'] '''
-
+    # ec_reg_rf = ec_fill.grid_search_cv('RandomForestRegressor', parameters, predict=True)
+    #
+    #
+    #
+    # '''Gradient Boosting Regressor to df['CHLORIDE'] '''
+    #
     # chloride_fill = PredictNull(series='CHLORIDE', df=df_num)
     #
-    # print('start')
-    # GradientBoosting = GradientBoostingRegressor(random_state=0)
     # parameters = {'max_depth': (1, 2, 3, 4, 5), 'learning_rate': (0.5, 0.1, 0.05, 0.01), 'n_estimators': (60, 70, 75, 80, 85, 90, 100)}
-    # clf_gb = GridSearchCV(GradientBoosting, parameters)
-    # clf_gb.fit(chloride_fill.X_train, chloride_fill.y_train)
-    # chloride_fill.predict(clf_gb)
+    # chloride_reg_gb = chloride_fill.grid_search_cv('GradientBoostingRegressor', parameters, predict=True)
     #
-    # AdaBoostRegressor = AdaBoostRegressor(random_state=0)
-    # parameters = { 'learning_rate': (0.5, 0.1, 0.05, 0.01), 'n_estimators': (60, 70, 75, 80, 85, 90, 100)}
-    # clf_ab = GridSearchCV(GradientBoosting, parameters)
-    # clf_ab.fit(chloride_fill.X_train, chloride_fill.y_train)
-    # chloride_fill.predict(clf_ab)
+    # parameters = {'learning_rate': (0.5, 0.1, 0.05, 0.01), 'n_estimators': (60, 70, 75, 80, 85, 90, 100)}
+    # chloride_reg_ab = chloride_fill.grid_search_cv('AdaBoostRegressor', parameters, predict=True)
     #
-    # RandomForestRegressor = RandomForestRegressor(random_state=0)
     # parameters = {'max_depth': (1, 2, 3, 4, 5), 'n_estimators': (60, 70, 75, 80, 85, 90, 100)}
-    # clf_rf = GridSearchCV(GradientBoosting, parameters)
-    # clf_rf.fit(chloride_fill.X_train, chloride_fill.y_train)
-    # chloride_fill.predict(clf_rf)
+    # chloride_reg_rf = chloride_fill.grid_search_cv('RandomForestRegressor', parameters, predict=True)
+
+
 
 
     '''Gradient Boosting Regressor to df['TH'] '''
 
     th_fill = PredictNull(series='TH', df=df_num)
 
-    print('start GridSearchCV TH column')
+    parameters = {'max_depth': (1, 2), 'learning_rate': (0.5, 0.1), 'n_estimators': (60, 70)}
+    th_reg_gb = th_fill.grid_search_cv('GradientBoostingRegressor', parameters, predict=True)
 
-    print('GradientBoosting')
-    GradientBoosting = GradientBoostingRegressor(random_state=0)
-    parameters = {'max_depth': (1, 2, 3, 4, 5), 'learning_rate': (0.5, 0.1, 0.05, 0.01), 'n_estimators': (60, 70, 75, 80, 85, 90, 100)}
-    clf_gb = GridSearchCV(GradientBoosting, parameters)
-    clf_gb.fit(th_fill.X_train, th_fill.y_train)
-    print(clf_gb.best_params_)
-    th_fill.predict(clf_gb)
-
-    print('AdaBoostRegressor')
-    AdaBoostRegressor = AdaBoostRegressor(random_state=0)
-    parameters = {'learning_rate': (0.5, 0.1, 0.05, 0.01), 'n_estimators': (60, 70, 75, 80, 85, 90, 100)}
-    clf_ab = GridSearchCV(GradientBoosting, parameters)
-    clf_ab.fit(th_fill.X_train, th_fill.y_train)
-    print(clf_ab.best_params_)
-    th_fill.predict(clf_ab)
-
-    print('RandomForestRegressor')
-    RandomForestRegressor = RandomForestRegressor(random_state=0)
-    parameters = {'max_depth': (1, 2, 3, 4, 5), 'n_estimators': (60, 70, 75, 80, 85, 90, 100)}
-    clf_rf = GridSearchCV(GradientBoosting, parameters)
-    clf_rf.fit(th_fill.X_train, th_fill.y_train)
-    print(clf_rf.best_params_)
-    th_fill.predict(clf_rf)
+    # parameters = {'learning_rate': (0.5, 0.1, 0.05, 0.01), 'n_estimators': (60, 70, 75, 80, 85, 90, 100)}
+    # th_reg_ab = th_fill.grid_search_cv('AdaBoostRegressor', parameters, predict=True)
+    #
+    # parameters = {'max_depth': (1, 2, 3, 4, 5), 'n_estimators': (60, 70, 75, 80, 85, 90, 100)}
+    # th_reg_rf = th_fill.grid_search_cv('RandomForestRegressor', parameters, predict=True)
 
 
 
