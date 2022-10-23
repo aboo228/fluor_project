@@ -8,6 +8,9 @@ from sklearn.ensemble import GradientBoostingRegressor
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.model_selection import train_test_split
 # from EDA import df_r
+
+
+
 from func import unique_pd, find_and_replace_not_num_values, isfloat
 path = r'df_r.csv'
 data = pd.read_csv(path, low_memory=False)
