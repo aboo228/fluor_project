@@ -8,9 +8,6 @@ from sklearn.ensemble import GradientBoostingRegressor
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.model_selection import train_test_split
 # from EDA import df_r
-
-
-
 from func import unique_pd, find_and_replace_not_num_values, isfloat
 path = r'df_r.csv'
 data = pd.read_csv(path, low_memory=False)
@@ -89,7 +86,7 @@ if __name__ == '__main__':
     # df_num['PH'] = df_num['PH'][df_num['PH']>0]
     # df_num['PH'] = df_num['PH'][df_num['PH']<20]
     # self = PredictNull(series='PH', df=df_num)
-    '''Gradient Boosting Regressor to df['PH'] '''
+    '''predict to df['PH'] '''
 
     # ph_fill = PredictNull(series='PH', df=df_num)
     #
@@ -104,22 +101,25 @@ if __name__ == '__main__':
     #
     #
     #
-    # '''Gradient Boosting Regressor to df['EC'] '''
+    # '''predict to df['EC'] '''
     #
     # ec_fill = PredictNull(series='EC', df=df_num)
     #
-    # parameters = {'max_depth': (1, 2, 3, 4, 5), 'learning_rate': (0.5, 0.1, 0.05, 0.01), 'n_estimators': (60, 70, 75, 80, 85, 90, 100)}
+    # ec_fill = PredictNull(series='EC', df=df_num)
+    #
+    # parameters = {'max_depth': (3, 4, 5, 6, 7), 'learning_rate': (0.5, 0.1, 0.05, 0.01),
+    #               'n_estimators': (50, 100, 150, 200, 250)}
     # ec_reg_gb = ec_fill.grid_search_cv('GradientBoostingRegressor', parameters, predict=True)
     #
-    # parameters = {'learning_rate': (0.5, 0.1, 0.05, 0.01), 'n_estimators': (60, 70, 75, 80, 85, 90, 100)}
+    # parameters = {'learning_rate': (0.5, 0.1, 0.05, 0.01), 'n_estimators': (50, 100, 150, 200, 250)}
     # ec_reg_ab = ec_fill.grid_search_cv('AdaBoostRegressor', parameters, predict=True)
     #
-    # parameters = {'max_depth': (1, 2, 3, 4, 5), 'n_estimators': (60, 70, 75, 80, 85, 90, 100)}
+    # parameters = {'max_depth': (3, 4, 5, 6, 7), 'n_estimators': (50, 100, 150, 200, 250)}
     # ec_reg_rf = ec_fill.grid_search_cv('RandomForestRegressor', parameters, predict=True)
     #
     #
     #
-    # '''Gradient Boosting Regressor to df['CHLORIDE'] '''
+    # '''predict to df['CHLORIDE'] '''
     #
     # chloride_fill = PredictNull(series='CHLORIDE', df=df_num)
     #
@@ -135,12 +135,12 @@ if __name__ == '__main__':
 
 
 
-    '''Gradient Boosting Regressor to df['TH'] '''
+    '''predict to df['TH'] '''
 
-    th_fill = PredictNull(series='TH', df=df_num)
-
-    parameters = {'max_depth': (1, 2), 'learning_rate': (0.5, 0.1), 'n_estimators': (60, 70)}
-    th_reg_gb = th_fill.grid_search_cv('GradientBoostingRegressor', parameters, predict=True)
+    # th_fill = PredictNull(series='TH', df=df_num)
+    #
+    # parameters = {'learning_rate': (0.5, 0.1, 0.05, 0.01), 'n_estimators': (60, 70, 75, 80, 85, 90, 100)}
+    # th_reg_gb = th_fill.grid_search_cv('GradientBoostingRegressor', parameters, predict=True)
 
     # parameters = {'learning_rate': (0.5, 0.1, 0.05, 0.01), 'n_estimators': (60, 70, 75, 80, 85, 90, 100)}
     # th_reg_ab = th_fill.grid_search_cv('AdaBoostRegressor', parameters, predict=True)
