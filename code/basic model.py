@@ -11,7 +11,8 @@ from func import unique_pd, find_and_replace_not_num_values, isfloat
 path = r'df_1.csv'
 df = pd.read_csv(path, low_memory=False)
 
-################################
+#######
+#########
 df = df[~df['FLUORIDE'].isna()]
 
 df_test = df.loc[:, ['FLUORIDE', 'PH', 'EC', 'CA', 'NA', 'CHLORIDE', 'TH', 'BICARBONATE', 'NITRATE', 'FE', 'RSC', 'TOT_ALKALINITY', 'CARBONATE', 'SAR', 'SULPHATE', 'K', 'TDS', 'SiO2', 'Arsenic', 'PO4']]
