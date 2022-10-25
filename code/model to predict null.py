@@ -43,7 +43,7 @@ class PredictNull:
         elif model == 'RandomForestRegressor':
             model = RandomForestRegressor(random_state=0)
 
-        self.regressor = GridSearchCV(model, parameters)
+        self.regressor = GridSearchCV(model, parameters, verbose=3)
         self.regressor.fit(self.X_train, self.y_train)
         print(f'best_params for {self.series} column in {self.model} {self.regressor.best_params_}')
 
@@ -137,9 +137,20 @@ if __name__ == '__main__':
 
     '''predict to df['TH'] '''
 
-    # th_fill = PredictNull(series='TH', df=df_num)
-    #
-    # parameters = {'learning_rate': (0.5, 0.1, 0.05, 0.01), 'n_estimators': (60, 70, 75, 80, 85, 90, 100)}
+    self = PredictNull(series='TH', df=df_num)
+
+    parameters = {'max_depth': (1, 2), 'n_estimators': (60, 70)}
+
+    model = RandomForestRegressor(random_state=0)
+
+    clf = GridSearchCV(model, parameters, verbose=3)
+    clf.fit(self.X_train, self.y_train)
+    print(f'best_params for {self.series} column in {model} {clf.best_params_}')
+    clf.best_score_
+    # self.predict()
+    # th_reg_gb = th_fill.grid_search_cv('GradientBoostingRegressor', parameters, predict=True)
+
+    # parameters = {'max_depth': (1, 2, 3, 4, 5), 'learning_rate': (0.5, 0.1, 0.05, 0.01), 'n_estimators': (60, 70, 75, 80, 85, 90, 100)}
     # th_reg_gb = th_fill.grid_search_cv('GradientBoostingRegressor', parameters, predict=True)
 
     # parameters = {'learning_rate': (0.5, 0.1, 0.05, 0.01), 'n_estimators': (60, 70, 75, 80, 85, 90, 100)}
