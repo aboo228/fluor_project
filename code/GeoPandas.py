@@ -35,8 +35,8 @@ for col in columns:
 gdf = geopandas.GeoDataFrame(
     df, geometry=geopandas.points_from_xy(df.LONGITUDE, df.LATITUDE))
 
-coord_list = [(x,y) for x,y in zip(gdf['geometry'].x, gdf['geometry'].y)]
+coord_list = [(x, y) for x,y in zip(gdf['geometry'].x, gdf['geometry'].y)]
 coord_list
 
-gdf['value'] = [x[0] for x in dataset.sample(coord_list)]
+gdf['sand_content'] = [x[0] for x in dataset.sample(coord_list)]
 gdf.head()

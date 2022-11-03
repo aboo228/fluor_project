@@ -8,22 +8,30 @@ from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import train_test_split
 # from EDA import df_r
 from func import unique_pd, find_and_replace_not_num_values, isfloat
-path = r'df_1.csv'
+path = r'df_fill_NA.csv'
 df = pd.read_csv(path, low_memory=False)
 
-#######
-#########
+
 df = df[~df['FLUORIDE'].isna()]
 
-df_test = df.loc[:, ['FLUORIDE', 'PH', 'EC', 'CA', 'NA', 'CHLORIDE', 'TH', 'BICARBONATE', 'NITRATE', 'FE', 'RSC', 'TOT_ALKALINITY', 'CARBONATE', 'SAR', 'SULPHATE', 'K', 'TDS', 'SiO2', 'Arsenic', 'PO4']]
+df_test = df.loc[:, ['PH', 'EC', 'TH',
+       'TOT_ALKALINITY', 'CA', 'MG', 'NA', 'K', 'CARBONATE',
+       'BICARBONATE', 'CHLORIDE', 'SULPHATE', 'NITRATE', 'FLUORIDE', 'SAR', 'RSC']]
+
 df_test = df_test.fillna(0)
 # df_test = pd.DataFrame(np.nan_to_num(df_test), columns =['FLUORIDE','PH'] )
-X = df_test.loc[:, ['PH', 'EC', 'CA', 'NA', 'CHLORIDE', 'TH', 'BICARBONATE', 'NITRATE', 'FE', 'RSC', 'TOT_ALKALINITY', 'CARBONATE', 'SAR', 'SULPHATE', 'K', 'TDS', 'SiO2', 'Arsenic', 'PO4']]
-y = df_test['FLUORIDE']
+X = df_test.loc[:, ['PH', 'EC', 'TH',
+       'TOT_ALKALINITY', 'CA', 'MG', 'NA', 'K', 'CARBONATE',
+       'BICARBONATE', 'CHLORIDE', 'SULPHATE', 'NITRATE', 'SAR', 'RSC']]
+
+y = df_test['FLUORIDE'].copy()
 '''convert target to boolean value'''
-param = 0.5
-y[y > 0.7] = 1
+
 y[y <= 0.7] = 0
+# y[y.between(0.7, 2, inclusive='right')] = 1
+y[y > 0.7] = 1
+
+
 
 
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2 )
