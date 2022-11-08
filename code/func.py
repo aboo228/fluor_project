@@ -42,11 +42,11 @@ def unique_pd(series, condition=None, sort_values = True, sort_index=False):
         unq = unq.sort_index()
     return unq
 
-def unique_pd(series, condition=None):
-    ''' make Series of unique values and count amaunt of uniqe '''
-    if condition is None:
-        condition = series
-    return series.groupby(condition).count()
+# def unique_pd(series, condition=None):
+#     ''' make Series of unique values and count amaunt of uniqe '''
+#     if condition is None:
+#         condition = series
+#     return series.groupby(condition).count()
 
 
 
