@@ -39,8 +39,8 @@ coord_list = [(x, y) for x,y in zip(gdf['geometry'].x, gdf['geometry'].y)]
 # gdf['sand_content'] = [x[0] for x in dataset.sample(coord_list)]
 # gdf.head()
 
-df_r = gdf.copy()
-df_r.to_csv('Data/gdf.csv', index=False)
+# df_r = gdf.copy()
+# df_r.to_csv('Data/gdf.csv', index=False)
 
 raster_list = ['PET', 'clay_content_1.5m', 'calcisols', 'ardity', 'alpha', 'AET', 'tri', 'slopes', 'silt_content_1.5m',
                'sand_content_1.5m', 'precipitation std', 'precipitation mean', 'pH_content_1.5m']
@@ -51,3 +51,9 @@ for i in tqdm(raster_list):
     dataset = rasterio.open(path_raster)
     raster = dataset.read()
     gdf[i] = [x[0] for x in dataset.sample(coord_list)]
+
+df_fill_TH = pd.read_csv(r'Data/df_fill_TH.csv', low_memory=False)
+df_marge = pd.concat([df_fill_TH, gdf.loc[:, :'PET']])
+
+# df_marge = df_marge.copy()
+# df_marge.to_csv('Data/gdf.csv', index=False)
