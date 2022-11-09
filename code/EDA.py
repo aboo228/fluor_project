@@ -43,6 +43,7 @@ columns = ['PH', 'EC', 'TH',
        'BICARBONATE', 'CHLORIDE', 'SULPHATE', 'NITRATE', 'FLUORIDE', 'SAR',
         'SiO2', 'TDS', 'Turbidity', '%Na', 'Arsenic', 'RSC']
 
+'''drop the columns'''
 
 
 
@@ -66,8 +67,7 @@ corr = df_numeric.corr()
 '''this part make histplot for all column'''
 # cols = ['PH', 'EC', 'TH',
 #        'TOT_ALKALINITY', 'CA', 'MG', 'NA', 'K', 'FE', 'CARBONATE',
-#        'BICARBONATE', 'CHLORIDE', 'SULPHATE', 'NITRATE', 'FLUORIDE', 'SAR',
-#        'RSC', 'SiO2', 'PO4', 'TDS', 'Turbidity', '%Na', 'Arsenic']
+#        'BICARBONATE', 'CHLORIDE', 'SULPHATE', 'NITRATE', 'FLUORIDcuont(nic']
 # for col in tqdm(cols):
 #     sns.histplot(df[col])
 #     plt.show()
@@ -76,3 +76,13 @@ corr = df_numeric.corr()
 # info.to_excel("info.xlsx")
 
 print('end')
+
+
+
+'''we can look thet amaunt of graoundwater growduring in time '''
+unique_pd(df.groupby('WRIS ID').count()['year'][1:])
+
+'''we sink to add new feature: fluoride t-1, so hear we can swo that no '''
+df_id_per_year = df.loc[:, ['WRIS ID', 'year', 'FLUORIDE']]
+df_id_per_year_sort = df_id_per_year.sort_values(['year', 'WRIS ID'])
+df_id_per_year_std = df_id_per_year.groupby(['WRIS ID']).std()
