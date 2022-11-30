@@ -2,12 +2,12 @@ import pandas as pd
 import numpy as np
 from tqdm import tqdm
 import sklearn
+from sklearn.metrics import confusion_matrix
 from sklearn.model_selection import GridSearchCV
 from sklearn.ensemble import AdaBoostRegressor
 from sklearn.ensemble import GradientBoostingRegressor
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.model_selection import train_test_split
-# from EDA import df_r
 from func import unique_pd, find_and_replace_not_num_values, isfloat
 path = r'Data/df_fill_NA.csv'
 data = pd.read_csv(path, low_memory=False)
