@@ -1,6 +1,8 @@
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
+from func import unique_pd, find_and_replace_not_num_values, isfloat
+
 from sklearn.model_selection import GridSearchCV
 from sklearn.ensemble import AdaBoostClassifier
 from sklearn.ensemble import GradientBoostingClassifier
@@ -14,7 +16,7 @@ from sklearn.svm import SVC
 from sklearn.pipeline import make_pipeline
 from sklearn.preprocessing import StandardScaler
 
-from func import unique_pd, find_and_replace_not_num_values, isfloat
+
 path = r'Data/gdf.csv'
 df = pd.read_csv(path, low_memory=False)
 
@@ -30,21 +32,19 @@ df = df[~df['FLUORIDE'].isna()]
 class ClassificationModel:
     def __init__(self, data):
         self.df = data
-        self.X = None
-        self.y = None
-        self.threshold_a = None
-        self.threshold_b = None
+        self.X, self.y = None, None
+        self.threshold_a, self.threshold_b = None, None
         self.X_train, self.X_test, self.y_train, self.y_test, self.y_pred = None, None, None, None, None
         self.clf = None
         self.confusionMatrix = None
-        self.df_percentage = None
+        self.confusion_df_percentage = None
 
 
     def split_df_to_train_test(self, threshold_a, threshold_b=None):
         self.threshold_a = threshold_a
         self.threshold_b = threshold_b
 
-        self.X = self.df.loc[:, 'PET':].copy()
+        self.X = self.df.loc[:, 'AET.tif':].copy()
         self.X = self.X.drop(['FLUORIDE'], axis=1).fillna(0)
         self.y = self.df['FLUORIDE'].copy()
 
@@ -71,9 +71,9 @@ class ClassificationModel:
         self.y_train = train['FLUORIDE'].copy()
         self.X_test = test.drop(['FLUORIDE'], axis=1).copy()
         self.y_test = test['FLUORIDE'].copy()
-        self.X_train = self.X_train.loc[:, 'PET':]
+        self.X_train = self.X_train.loc[:, 'AET.tif':]
         self.X_train = self.X_train.fillna(0)
-        self.X_test = self.X_test.loc[:, 'PET':]
+        self.X_test = self.X_test.loc[:, 'AET.tif':]
         self.X_test = self.X_test.fillna(0)
         '''convert target to boolean value'''
         self.y_train[self.y_train <= self.threshold_a] = 0
@@ -117,11 +117,11 @@ class ClassificationModel:
         _.rename(columns={"STATE_NAME": "percentage"}, inplace=True)
         series_percentage = _.drop(['_'], axis=1)
 
-        self.df_percentage = pd.concat([series_percentage, unique_pd(df_slice_by_index[slice_by_feature])], axis=1)
-        self.df_percentage.rename(columns={"STATE_NAME": "Count"}, inplace=True)
+        self.confusion_df_percentage = pd.concat([series_percentage, unique_pd(df_slice_by_index[slice_by_feature])], axis=1)
+        self.confusion_df_percentage.rename(columns={"STATE_NAME": "Count"}, inplace=True)
 
         if to_print is True:
-            print(self.df_percentage)
+            print(self.confusion_df_percentage)
 
 
 

@@ -10,43 +10,14 @@ df_A = pd.read_csv(path_part_A, low_memory=False)
 path_part_B = r'Data/GWQ_2010-2018 coord corrected_csv.csv'
 df_B = pd.read_csv(path_part_B, low_memory=False)
 
-'''mathup name columns'''
+'''math up name columns'''
 df_B.rename(columns={'LATITUD': 'LATITUDE', 'LOGITUD': 'LONGITUDE'}, inplace=True)
 df = pd.concat([df_A, df_B], axis=0)
 
-
 df.reset_index(inplace=True)
 
-
-'''this part show that most the SITE is had less then 5 instance'''
-# unique = unique_pd(df['SITE_ID'], df['SITE_ID'])
-# unique = unique.drop('New')
-# sns.histplot(unique)
-# plt.show()
-
-'''preper df['RSC']'''
 df['RSC'].replace([' ', '#REF!', '#VALUE!', 'ND'], None, inplace=True)
-
-
-'''this part we fix the numrical columns'''
-columns = ['PH', 'EC', 'TH',
-       'TOT_ALKALINITY', 'CA', 'MG', 'NA', 'K', 'CARBONATE',
-       'BICARBONATE', 'CHLORIDE', 'SULPHATE', 'NITRATE', 'FLUORIDE', 'SAR', 'RSC']
-
-'''drop the columns'''
-'''we choose drop the columns that precent the null high from 70% '''
-df.drop(['FE', 'SiO2', 'PO4', 'TDS', 'Turbidity', '%Na', 'Arsenic', 'LR. No'], axis=1, inplace=True)
-
-
-
-for col in columns:
-    print(col)
-    df[col].replace(['-', '<5', '<1', 'B', '*'], None, inplace=True)
-
-    df[col], _ = find_and_replace_not_num_values(df[col], replace_to=None, inplace=True, astype=True, lops=True, list_values=True)
-
-'''before get_dummies we fix the typing errors'''
-df['STATE_NAME'][df['STATE_NAME'] == 'Uttarakhand '].replace('Uttarakhand')
+df['STATE_NAME'][df['STATE_NAME'] == 'Uttarakhand '].replace('Uttarakhand', inplace=True)
 df['SITE_TYPE'].replace(['DW', 'D.W.', 'Dug well', ' Dug Well', 'dug', 'Dugwell', 'DUGWWELL', 'Dug', 'DUG',
                                     'WELL', 'D/W', 'Dug Welll', 'Dug ', 'DUG WELL', 'DCB', 'Mark II ', 'CGWB SPZ'],
                         'Dug Well', inplace=True)
@@ -64,21 +35,45 @@ df['SITE_TYPE'].replace(['TW M-II', 'Tw Mark-II', 'Mark-II T.W.', 'TW Mark-II', 
                          , 'Twmark-II', 'Mrk II'], 'TW Mark II', inplace=True)
 
 
-df_get_dummies = pd.get_dummies(df.loc[:, ['SITE_TYPE', 'STATE_NAME', 'year']], columns=['SITE_TYPE', 'STATE_NAME', 'year'])
+'''we choose drop the columns that precent the null high from 70% '''
+df.drop(['FE', 'SiO2', 'PO4', 'TDS', 'Turbidity', '%Na', 'Arsenic', 'LR. No'], axis=1, inplace=True)
 
+
+columns = ['PH', 'EC', 'TH',
+       'TOT_ALKALINITY', 'CA', 'MG', 'NA', 'K', 'CARBONATE',
+       'BICARBONATE', 'CHLORIDE', 'SULPHATE', 'NITRATE', 'FLUORIDE', 'SAR', 'RSC']
+
+'''this part we fix the numrical columns'''
+for col in columns:
+    df[col].replace(['-', '<5', '<1', 'B', '*'], None, inplace=True)
+    df[col], _ = find_and_replace_not_num_values(df[col], replace_to=None, inplace=True, astype=True, lops=True, list_values=True)
+
+
+df_get_dummies = pd.get_dummies(df.loc[:, ['SITE_TYPE', 'STATE_NAME']], columns=['SITE_TYPE', 'STATE_NAME'])
 df_get_dummies = df_get_dummies.copy()
 df_get_dummies.to_csv('Data/df_get_dummies.csv', index=False)
+
 
 '''df ready to fill null '''
 df_eda = df.copy()
 df_eda.to_csv('Data/df_eda.csv', index=False)
 
+
+
+
+
+
 '''now we can look statistical numeric columns'''
 df_numeric = df.loc[:, 'PH':]
-
 describe = df_numeric.describe()
 corr = df_numeric.corr()
 info_null = df.count()
+
+'''this part show that most the SITE is had less then 5 instance'''
+# unique = unique_pd(df['SITE_ID'], df['SITE_ID'])
+# unique = unique.drop('New')
+# sns.histplot(unique)
+# plt.show()
 
 '''this part make histplot for all column'''
 # cols = ['SITE_ID', 'WRIS ID', 'LATITUDE', 'LONGITUDE', 'SITE_TYPE',
@@ -93,7 +88,7 @@ info_null = df.count()
 
 # info.to_excel("info.xlsx")
 
-print('end')
+
 
 
 

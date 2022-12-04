@@ -52,6 +52,7 @@ def unique_pd(series, condition=None, sort_values = True, sort_index=False):
 
 def find_and_replace_not_num_values(series, replace_to=0, inplace=False, astype=0, lops=False, list_values=False):
     '''find and replace values in series that are not numeric'''
+    print(series.name)
     list_str_unique_values = unique_pd(series[~series.fillna('ND').str.isnumeric()]).index.to_list()
     list_for_comparison = []
     count = 0
