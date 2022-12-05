@@ -26,7 +26,7 @@ class PredictNull:
         self.X = pd.DataFrame(np.nan_to_num(self.X), columns=list(self.X.columns))
         self.series = series
         self.y = self.df_train[series]
-        self.X_train, self.X_test, self.y_train, self.y_test = train_test_split(self.X, self.y, test_size=0.2)
+        self.X_train, self.X_test, self.y_train, self.y_test = train_test_split(self.X, self.y, test_size=0.2, random_state=42)
         self.model = None
         self.regressor = None
         self.prediction = None

@@ -20,13 +20,14 @@ from sklearn.preprocessing import StandardScaler
 path = r'Data/gdf.csv'
 df = pd.read_csv(path, low_memory=False)
 
-'''df_get_dummies SITE_TYPE, STATE_NAME, year'''
+'''df_get_dummies SITE_TYPE, STATE_NAME'''
 path_df_get_dummies = 'Data/df_get_dummies.csv'
 df_get_dummies = pd.read_csv(path_df_get_dummies, low_memory=False)
-# df_get_dummies = df_get_dummies.loc[:, :'SITE_TYPE_Bore Well']
+
 df = pd.concat([df, df_get_dummies], axis=1)
+
 # df = df[df['STATE_NAME'] == 'Rajasthan']
-'''create dataset were fluoride is nut null'''
+
 df = df[~df['FLUORIDE'].isna()]
 
 class ClassificationModel:
@@ -55,7 +56,7 @@ class ClassificationModel:
         # self.y[self.y > 2] = self.threshold_b
         self.y = self.y.astype('int')
 
-        self.X_train, self.X_test, self.y_train, self.y_test = train_test_split(self.X, self.y, test_size=0.2)
+        self.X_train, self.X_test, self.y_train, self.y_test = train_test_split(self.X, self.y, test_size=0.2, random_state=42)
         print(unique_pd(self.y_test))
 
 
@@ -93,14 +94,19 @@ class ClassificationModel:
     def confusion_matrix(self):
 
         self.confusionMatrix = confusion_matrix(self.y_test, self.y_pred)
-        recall = self.confusionMatrix[0, 0] / (self.confusionMatrix[0, 0] + self.confusionMatrix[0, 1])
-        precision = self.confusionMatrix[0, 0] / (self.confusionMatrix[0, 0] + self.confusionMatrix[1, 0])
-        accyracy = (self.confusionMatrix[0, 0] + self.confusionMatrix[1, 1]) / self.y_test.count()
-        Senstivity = self.confusionMatrix[1, 1] / (self.confusionMatrix[1, 1] + self.confusionMatrix[1, 0])
-        Specificity = self.confusionMatrix[1, 1] / (self.confusionMatrix[1, 0] + self.confusionMatrix[1, 1])
+        true_positive, false_positive, false_negative, true_negative = self.confusionMatrix[0, 0],\
+                                                                       self.confusionMatrix[0, 1],\
+                                                                       self.confusionMatrix[1, 0],\
+                                                                       self.confusionMatrix[1, 1]
+
+        recall = true_positive / (true_positive + false_negative)
+        precision = true_positive / (true_positive + false_positive)
+        accuracy = (true_positive + true_negative) / self.y_test.count()
+        sensitivity = true_positive / (true_positive + false_negative)
+        specificity = true_negative / (true_negative + false_positive)
         print(f'recall is {"{:.2%}".format(recall)}\nprecision is {"{:.2%}".format(precision)}'
-              f'\naccyracy is {"{:.2%}".format(accyracy)}\nSenstivity is {"{:.2%}".format(Senstivity)}'
-              f'\nSpecificity is {"{:.2%}".format(Specificity)}')
+              f'\naccuracy is {"{:.2%}".format(accuracy)}\nSensitivity is {"{:.2%}".format(sensitivity)}'
+              f'\nSpecificity is {"{:.2%}".format(specificity)}')
         print(f'\n{self.confusionMatrix}')
 
     def confusion_df(self, slice_by_feature, to_print=False):

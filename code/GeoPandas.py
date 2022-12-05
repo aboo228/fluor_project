@@ -1,10 +1,5 @@
 import pandas as pd
-import numpy as np
 from func import unique_pd, find_and_replace_not_num_values, isfloat
-import seaborn as sns
-import matplotlib.pyplot as plt
-from tqdm import tqdm
-
 import geopandas
 import rasterio
 from rasterio.plot import show
@@ -50,14 +45,6 @@ path_raster_list = ['New India Maps/General Raster', 'New India Maps/Ardity', 'N
 for path in path_raster_list:
     gdf = load_rester(path, gdf)
 
-# gdf = pd.DataFrame(load_rester(path, gdf) for path in path_raster_list)
-# general_raster = load_rester('New India Maps/General Raster', gdf)
-# ardity = load_rester('New India Maps/Ardity', gdf)
-# precipitation = load_rester('New India Maps/precipitation', gdf)
-# gdf = pd.concat([general_raster.loc[:, 'AET.tif':], ardity.loc[:, 'Ardity 2010.tif':], precipitation.loc[:, 'precipitaion 2010.tif':]], axis=1)
-#
-df_marge = pd.concat([gdf.drop(df_fill_TH.columns.to_list(), axis=1), df_fill_TH], axis=1)
-df_marge.copy().to_csv('Data/gdf.csv', index=False)
 
 feature_raster_list = ['Ardity', 'precipitaion']
 for raster in feature_raster_list:
