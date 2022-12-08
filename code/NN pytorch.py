@@ -28,6 +28,8 @@ df = pd.concat([df, df_get_dummies], axis=1)
 
 df = df[~df['FLUORIDE'].isna()]
 
+df.copy().to_csv('df for colab.csv', index=False)
+
 
 class Model(nn.Module):
     def __init__(self, df):
