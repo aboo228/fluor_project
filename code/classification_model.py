@@ -99,7 +99,7 @@ class ClassificationModel:
                                                                        self.confusionMatrix[1, 0],\
                                                                        self.confusionMatrix[1, 1]
 
-        recall = true_positive / (true_positive + false_negative)
+        recall = true_positive / (true_positive + false_positive)
         precision = true_positive / (true_positive + false_positive)
         accuracy = (true_positive + true_negative) / self.y_test.count()
         sensitivity = true_positive / (true_positive + false_negative)

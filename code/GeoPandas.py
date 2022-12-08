@@ -29,22 +29,19 @@ def load_rester(path_raster, data):
     return gdf
 
 
-# path_general_raster = 'New India Maps/General Raster'
-# path_ardity = 'New India Maps/Ardity'
-# path_precipitation = 'New India Maps/precipitation'
-# path_list = [path_general_raster, path_ardity, path_precipitation]
+
 columns_coordinates = ['LATITUDE', 'LONGITUDE']
 
 for col in columns_coordinates:
     gdf[col], _ = find_and_replace_not_num_values(gdf[col], replace_to=0, inplace=True, astype=True, lops=True, list_values=True)
 
 gdf = geopandas.GeoDataFrame(gdf, geometry=geopandas.points_from_xy(gdf.LONGITUDE, gdf.LATITUDE))
-# gdf = pd.DataFrame([load_rester(path, gdf) for path in path_list])
+
 
 path_raster_list = ['New India Maps/General Raster', 'New India Maps/Ardity', 'New India Maps/precipitation']
 for path in path_raster_list:
     gdf = load_rester(path, gdf)
-
+# gdf = pd.DataFrame([load_rester(path, gdf) for path in path_raster_list])
 
 feature_raster_list = ['Ardity', 'precipitaion']
 for raster in feature_raster_list:
