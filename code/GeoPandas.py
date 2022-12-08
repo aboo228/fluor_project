@@ -51,6 +51,8 @@ for raster in feature_raster_list:
 
 df_marge = pd.concat([gdf.drop(df_fill_TH.columns.to_list(), axis=1), df_fill_TH], axis=1)
 df_marge.copy().to_csv('Data/gdf.csv', index=False)
+df_marge.copy().to_csv('gdf.csv', index=False)
+
 print('end')
 
 
