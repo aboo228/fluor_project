@@ -125,7 +125,7 @@ if __name__ == "__main__":
     def objective(trial):
 
         params = {
-            'learning_rate': trial.suggest_loguniform('learning_rate', low=1e-3, high=1e-1),
+            'learning_rate': trial.suggest_float('learning_rate', low=0.0001, high=0.01),
             'optimizer': trial.suggest_categorical("optimizer", ["Adam", "RMSprop", "SGD"]),
             'activation1' : trial.suggest_categorical('activation1', ['leaky_relu', 'relu']),
             'activation2' : trial.suggest_categorical('activation2', ['leaky_relu', 'relu']),
@@ -182,3 +182,15 @@ if __name__ == "__main__":
 
     study = optuna.create_study(direction="maximize", sampler=optuna.samplers.TPESampler())
     study.optimize(objective, n_trials=30)
+
+    '''[I 2022-12-08 16:03:59,615] Trial 36 finished with value: 0.5854765506807866 and parameters: {'learning_rate': 0.014434972975292901, 'optimizer': 'Adam', 'activation1': 'relu', 'activation2': 'relu', 'activation3': 'leaky_relu', 'activation4': 'relu', 'activation5': 'relu', 'l1': 230, 'l2': 120, 'l3': 90, 'l4': 120, 'l5': 230, 'dropout': 0.14}. Best is trial 30 with value: 0.6031653671593157.
+'''
+    '''[I 2022-12-08 16:12:00,316] Trial 38 finished with value: 0.5967648085651112 and parameters: {'learning_rate': 0.008932111800449834, 'optimizer': 'RMSprop', 'activation1': 'leaky_relu', 'activation2': 'relu', 'activation3': 'leaky_relu', 'activation4': 'relu', 'activation5': 'relu', 'l1': 100, 'l2': 180, 'l3': 200, 'l4': 40, 'l5': 270, 'dropout': 0.2}. Best is trial 30 with value: 0.6031653671593157.
+r'''
+    '''[I 2022-12-08 16:25:45,589] Trial 41 finished with value: 0.5990922844175491 and parameters: {'learning_rate': 0.008935430873648231, 'optimizer': 'RMSprop', 'activation1': 'leaky_relu', 'activation2': 'relu', 'activation3': 'leaky_relu', 'activation4': 'relu', 'activation5': 'relu', 'l1': 110, 'l2': 160, 'l3': 280, 'l4': 50, 'l5': 270, 'dropout': 0.18000000000000002}. Best is trial 30 with value: 0.6031653671593157.
+r'''
+    '''[I 2022-12-08 16:35:52,409] Trial 43 finished with value: 0.6494821366228325 and parameters: {'learning_rate': 0.004655344720768033, 'optimizer': 'RMSprop', 'activation1': 'leaky_relu', 'activation2': 'relu', 'activation3': 'leaky_relu', 'activation4': 'relu', 'activation5': 'relu', 'l1': 60, 'l2': 190, 'l3': 250, 'l4': 40, 'l5': 250, 'dropout': 0.18000000000000002}. Best is trial 43 with value: 0.6494821366228325.
+r'''
+    '''[I 2022-12-09 15:19:41,212] Trial 24 finished with value: 0.6066565809379728 and parameters: {'learning_rate': 0.004647040986556792, 'optimizer': 'SGD', 'activation1': 'leaky_relu', 'activation2': 'relu', 'activation3': 'relu', 'activation4': 'leaky_relu', 'activation5': 'relu', 'l1': 260, 'l2': 770, 'l3': 500, 'l4': 320, 'l5': 880, 'dropout': 0.05, 'epochs': 60}. Best is trial 24 with value: 0.6066565809379728.
+recall is 84.74%
+'''
