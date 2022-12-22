@@ -1,5 +1,5 @@
 import pandas as pd
-from func import unique_pd, find_and_replace_not_num_values, isfloat
+from func import *
 import geopandas
 import rasterio
 from rasterio.plot import show

@@ -35,7 +35,7 @@ class Model(nn.Module):
         super().__init__()
         self.params = params
         self.df = df
-        self.fc1 = nn.Linear(in_features=93, out_features=self.params['l1'])
+        self.fc1 = nn.Linear(in_features=90, out_features=self.params['l1'])
         self.fc2 = nn.Linear(in_features=self.params['l1'], out_features=self.params['l2'])
         self.fc3 = nn.Linear(in_features=self.params['l2'], out_features=self.params['l3'])
         self.fc4 = nn.Linear(in_features=self.params['l3'], out_features=self.params['l4'])
@@ -44,11 +44,12 @@ class Model(nn.Module):
 
         self.dropout = nn.Dropout(p=params['dropout'])
 
+
     def forward(self, x=None):
         if x is None:
             x = self.X_train
         # x = self.X_train
-        x = F.relu(self.fc1(x))
+        x = self.params['activation1'](self.fc1(x))
         x = F.relu(self.fc2(x))
         x = self.dropout(F.relu(self.fc3(x)))
         x = F.relu(self.fc4(x))
@@ -127,7 +128,7 @@ if __name__ == "__main__":
         params = {
             'learning_rate': trial.suggest_float('learning_rate', low=0.0001, high=0.01),
             'optimizer': trial.suggest_categorical("optimizer", ["Adam", "RMSprop", "SGD"]),
-            'activation1' : trial.suggest_categorical('activation1', ['leaky_relu', 'relu']),
+            'activation1' : trial.suggest_categorical('activation1', [F.leaky_relu, F.relu]),
             'activation2' : trial.suggest_categorical('activation2', ['leaky_relu', 'relu']),
             'activation3' : trial.suggest_categorical('activation3', ['leaky_relu', 'relu']),
             'activation4' : trial.suggest_categorical('activation4', ['leaky_relu', 'relu']),
@@ -191,6 +192,6 @@ r'''
 r'''
     '''[I 2022-12-08 16:35:52,409] Trial 43 finished with value: 0.6494821366228325 and parameters: {'learning_rate': 0.004655344720768033, 'optimizer': 'RMSprop', 'activation1': 'leaky_relu', 'activation2': 'relu', 'activation3': 'leaky_relu', 'activation4': 'relu', 'activation5': 'relu', 'l1': 60, 'l2': 190, 'l3': 250, 'l4': 40, 'l5': 250, 'dropout': 0.18000000000000002}. Best is trial 43 with value: 0.6494821366228325.
 r'''
-    '''[I 2022-12-09 15:19:41,212] Trial 24 finished with value: 0.6066565809379728 and parameters: {'learning_rate': 0.004647040986556792, 'optimizer': 'SGD', 'activation1': 'leaky_relu', 'activation2': 'relu', 'activation3': 'relu', 'activation4': 'leaky_relu', 'activation5': 'relu', 'l1': 260, 'l2': 770, 'l3': 500, 'l4': 320, 'l5': 880, 'dropout': 0.05, 'epochs': 60}. Best is trial 24 with value: 0.6066565809379728.
+    '''[I 2022-12-09 15:19:41,212] Trial 24 finished with value: 0.6066565809379728 and parameters: {'learning_rate': 0.004647040986556792, 'optimizer': 'SGD', 'activation1': 'leaky_relu', 'activation2': 'relu', 'activation3': 'relu', 'activation4': 'leaky_relu', 'activation5': 'relu', 'l1': 260, 'l2': 770, 'l3': 500, 'l4': 320, 'l5': 880, 'dropout': 0., 'epochs': 60}. Best is trial 24 with value: 0.6066565809379728.
 recall is 84.74%
 '''

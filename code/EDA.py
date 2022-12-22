@@ -1,6 +1,6 @@
 import pandas as pd
 import numpy as np
-from func import unique_pd, find_and_replace_not_num_values, isfloat
+from func import *
 import seaborn as sns
 import matplotlib.pyplot as plt
 from tqdm import tqdm
@@ -34,6 +34,11 @@ df['SITE_TYPE'].replace(['TW M-II', 'Tw Mark-II', 'Mark-II T.W.', 'TW Mark-II', 
        'TW mark II', 'T.W. Mark-II', 'MARK-II', 'Mark-II Tw', 'Mark-Il', 'SEW', 'Sub T.W', 'TIRUVALLUR'
                          , 'Twmark-II', 'Mrk II'], 'TW Mark II', inplace=True)
 
+df['STATE_NAME'].replace(['Uttarakhand '], 'Uttarakhand', inplace=True)
+df['STATE_NAME'].replace(['Daman & Diu'], 'Dadra And Nagar Haveli', inplace=True)
+df['STATE_NAME'].replace(['Chandigarh'], 'Punjab', inplace=True)
+
+
 
 '''we choose drop the columns that precent the null high from 70% '''
 df.drop(['FE', 'SiO2', 'PO4', 'TDS', 'Turbidity', '%Na', 'Arsenic', 'LR. No'], axis=1, inplace=True)
@@ -47,7 +52,6 @@ columns = ['PH', 'EC', 'TH',
 for col in columns:
     df[col].replace(['-', '<5', '<1', 'B', '*'], None, inplace=True)
     df[col], _ = find_and_replace_not_num_values(df[col], replace_to=None, inplace=True, astype=True, lops=True, list_values=True)
-
 
 df_get_dummies = pd.get_dummies(df.loc[:, ['SITE_TYPE', 'STATE_NAME']], columns=['SITE_TYPE', 'STATE_NAME'])
 df_get_dummies = df_get_dummies.copy()
@@ -86,9 +90,6 @@ info_null = df.count()
 #     plt.show()
 
 
-# info.to_excel("info.xlsx")
-
-
 
 
 
@@ -102,17 +103,7 @@ df_id_per_year_std = df_id_per_year.groupby(['WRIS ID']).std()
 
 '''we can saw the difrent in fluoride growndwaters between the states '''
 
-df_state_join_per_year = pd.DataFrame()
-for year in tqdm(list(set(df['year']))):
-    _ = df.loc[:, ['year', 'STATE_NAME']][df['year'] == year].groupby('STATE_NAME').count().sort_index()
-    df_state_join_per_year = pd.concat([df_state_join_per_year, _], axis=1)
-    df_state_join_per_year.rename(columns={'year': year}, inplace=True)
-state_count = df.loc[:, ['STATE_NAME', 'year']].groupby(['STATE_NAME']).count()
-state_count.rename(columns={'year': 'count'}, inplace=True)
-fluoride_groupby_state = df.loc[:, ['STATE_NAME', 'FLUORIDE']].groupby(['STATE_NAME']).mean()
-df_state_join_per_year_count = pd.concat([fluoride_groupby_state, state_count, df_state_join_per_year], axis=1)
 
-
-
+df_split_column_by_column_count = df_split_column_by_column(df=df, split_column='STATE_NAME', by_column= 'year')
 
 

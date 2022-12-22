@@ -1,7 +1,7 @@
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
-from func import unique_pd, find_and_replace_not_num_values, isfloat
+from func import *
 
 from sklearn.model_selection import GridSearchCV
 from sklearn.ensemble import AdaBoostClassifier
@@ -17,6 +17,8 @@ from sklearn.pipeline import make_pipeline
 from sklearn.preprocessing import StandardScaler
 
 
+
+
 path = r'Data/gdf.csv'
 df = pd.read_csv(path, low_memory=False)
 
@@ -26,9 +28,10 @@ df_get_dummies = pd.read_csv(path_df_get_dummies, low_memory=False)
 
 df = pd.concat([df, df_get_dummies], axis=1)
 
-# df = df[df['STATE_NAME'] == 'Rajasthan']
 
-df = df[~df['FLUORIDE'].isna()]
+'''remove the outlayers'''
+df = df[df['FLUORIDE'] < 30]
+# df = df[~df['FLUORIDE'].isna()]
 
 class ClassificationModel:
     def __init__(self, data):
@@ -82,16 +85,23 @@ class ClassificationModel:
         self.y_test[self.y_test <= self.threshold_a] = 0
         self.y_test[self.y_test > self.threshold_a] = 1
 
-    def fit_and_predict(self, clf):
+    def fit(self, clf):
         self.clf = clf
         self.clf.fit(self.X_train, self.y_train)
-        # print(clf.score(self.X_test, self.y_test))
-        self.y_pred = self.clf.predict(self.X_test)
-        unique_pd(pd.Series(self.y_pred))
-        unique_y_pred = unique_pd(pd.Series(self.y_pred))
-        print(f'{unique_y_pred[0]} under the threshold\n{unique_y_pred[1]} above the threshold')
 
-    def confusion_matrix(self):
+    def predict(self, X):
+        self.y_pred = self.clf.predict(X)
+        unique_pd(pd.Series(self.y_pred))
+        if len(X) > 1:
+            unique_y_pred = unique_pd(pd.Series(self.y_pred))
+            print(f'{unique_y_pred[0]} under the threshold\n{unique_y_pred[1]} above the threshold')
+            self.X_test = X
+        elif len(X) == 1:
+            print(self.y_pred)
+            return int(self.y_pred)
+
+    def confusion_matrix(self, y):
+        self.y_test = y
 
         self.confusionMatrix = confusion_matrix(self.y_test, self.y_pred)
         true_positive, false_positive, false_negative, true_negative = self.confusionMatrix[0, 0],\
@@ -108,6 +118,10 @@ class ClassificationModel:
               f'\naccuracy is {"{:.2%}".format(accuracy)}\nSensitivity is {"{:.2%}".format(sensitivity)}'
               f'\nSpecificity is {"{:.2%}".format(specificity)}')
         print(f'\n{self.confusionMatrix}')
+        list_matrix = [recall, precision, accuracy, sensitivity, specificity]
+        matrix = {'recall': recall, 'precision': precision,
+                       'accuracy': accuracy, 'sensitivity': sensitivity, 'specificity': specificity}
+        return matrix
 
     def confusion_df(self, slice_by_feature, to_print=False):
         df_confusion = pd.concat([pd.Series(self.y_pred), self.y_test.reset_index()], axis=1)
@@ -118,16 +132,19 @@ class ClassificationModel:
         df_eda = pd.read_csv(path_data, low_memory=False)
         df_slice_by_index = df_eda.loc[df_confusion['index'].to_list()]
         series_slice_by_confusion_list = unique_pd(df_slice_by_index.loc[confusion_list][slice_by_feature])
-        series_percentage = series_slice_by_confusion_list / unique_pd(df_slice_by_index[slice_by_feature])
+        series_percentage = (series_slice_by_confusion_list / unique_pd(df_slice_by_index[slice_by_feature])).round(2)
         _ = pd.concat([pd.DataFrame(columns=['_']), series_percentage], axis=1)
-        _.rename(columns={"STATE_NAME": "percentage"}, inplace=True)
+        _.rename(columns={"STATE_NAME": "percentage of confusion"}, inplace=True)
         series_percentage = _.drop(['_'], axis=1)
+        series_percentage = pd.concat([series_percentage, series_slice_by_confusion_list], axis=1)
+        series_percentage.rename(columns={"STATE_NAME": "Count confusion state instance"}, inplace=True)
 
         self.confusion_df_percentage = pd.concat([series_percentage, unique_pd(df_slice_by_index[slice_by_feature])], axis=1)
-        self.confusion_df_percentage.rename(columns={"STATE_NAME": "Count"}, inplace=True)
+        self.confusion_df_percentage.rename(columns={"STATE_NAME": "Count state instance"}, inplace=True)
 
         if to_print is True:
             print(self.confusion_df_percentage)
+            return self.confusion_df_percentage
 
 
 
@@ -176,11 +193,13 @@ if __name__ == '__main__':
 
 
 
+
     self = ClassificationModel(df)
     self.split_df_to_train_test(0.7)
-    self.fit_and_predict(clf_GradientBoosting)
-    self.confusion_matrix()
-    self.confusion_df('STATE_NAME')
+    self.fit(clf_GradientBoosting)
+    self.predict(self.X_test)
+    self.confusion_matrix(self.y_test)
+    self.confusion_df('STATE_NAME', to_print=True)
 
     # list_clf = [clf_GradientBoosting, clf_AdaBoost, clf_RandomForest, clf_LogisticRegression, clf_svm]
     # for clf in list_clf:

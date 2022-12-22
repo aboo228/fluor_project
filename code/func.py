@@ -42,11 +42,6 @@ def unique_pd(series, condition=None, sort_values = True, sort_index=False):
         unq = unq.sort_index()
     return unq
 
-# def unique_pd(series, condition=None):
-#     ''' make Series of unique values and count amaunt of uniqe '''
-#     if condition is None:
-#         condition = series
-#     return series.groupby(condition).count()
 
 
 
@@ -82,3 +77,16 @@ def predict_null(series, predict_func, data):
         if list(series[i:i + 1].isna())[0] is True:
             series[i] = predict_func.predict(data[i:i + 1])
 
+
+
+def df_split_column_by_column(df,split_column, by_column):
+    df_split_column_by_column = pd.DataFrame()
+    for i in tqdm(list(set(df[by_column]))):
+        _ = df.loc[:, [by_column, split_column]][df[by_column] == i].groupby(split_column).count().sort_index()
+        df_split_column_by_column = pd.concat([df_split_column_by_column, _], axis=1)
+        df_split_column_by_column.rename(columns={by_column: i}, inplace=True)
+    column_count = df.loc[:, [split_column, by_column]].groupby([split_column]).count()
+    column_count.rename(columns={by_column: 'count'}, inplace=True)
+    fluoride_groupby_state = df.loc[:, [split_column, 'FLUORIDE']].groupby([split_column]).mean()
+    df_split_column_by_column_count = pd.concat([fluoride_groupby_state, column_count, df_split_column_by_column], axis=1)
+    return df_split_column_by_column_count
