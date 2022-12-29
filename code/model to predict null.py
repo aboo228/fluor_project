@@ -79,16 +79,16 @@ class PredictNull:
 if __name__ == '__main__':
 
     '''predict to df['TH'] '''
-    # th_fill = PredictNull(series='TH', df=df_num)
+    th_fill = PredictNull(series='TH', df=df_num)
 
-    # parameters = {'max_depth': (1, 2, 3, 4, 5), 'learning_rate': (0.5, 0.1, 0.05, 0.01), 'n_estimators': (60, 70, 75, 80, 85, 90, 100)}
-    # th_reg_gb = th_fill.grid_search_cv('GradientBoostingRegressor', parameters, predict=True)
+    parameters = {'max_depth': (1, 2, 3, 4, 5), 'learning_rate': (0.5, 0.1, 0.05, 0.01), 'n_estimators': (60, 70, 75, 80, 85, 90, 100)}
+    th_reg_gb = th_fill.grid_search_cv('GradientBoostingRegressor', parameters, predict=True)
 
-    # parameters = {'learning_rate': (0.5, 0.1, 0.05), 'n_estimators': (60, 70, 80, 90, 100)}
-    # th_reg_ab = th_fill.grid_search_cv('AdaBoostRegressor', parameters, predict=True)
-    #
-    # parameters = {'max_depth': (3, 4, 5), 'n_estimators': (60, 70, 80, 90, 100)}
-    # th_reg_rf = th_fill.grid_search_cv('RandomForestRegressor', parameters, predict=True)
+    parameters = {'learning_rate': (0.5, 0.1, 0.05), 'n_estimators': (60, 70, 80, 90, 100)}
+    th_reg_ab = th_fill.grid_search_cv('AdaBoostRegressor', parameters, predict=True)
+
+    parameters = {'max_depth': (3, 4, 5), 'n_estimators': (60, 70, 80, 90, 100)}
+    th_reg_rf = th_fill.grid_search_cv('RandomForestRegressor', parameters, predict=True)
 
 
     '''fill null in TH column'''

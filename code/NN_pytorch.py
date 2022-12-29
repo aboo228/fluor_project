@@ -1,19 +1,14 @@
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-import pandas as pd
-import numpy as np
-import matplotlib.pyplot as plt
-from func import unique_pd, find_and_replace_not_num_values, isfloat
+from func import *
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
-import seaborn as sns
 import matplotlib.pyplot as plt
 
 
 device = "cuda" if torch.cuda.is_available() else "cpu"
 print(f"Using {device} device")
-
 
 path = r'Data/gdf.csv'
 df = pd.read_csv(path, low_memory=False)
@@ -21,13 +16,27 @@ df = pd.read_csv(path, low_memory=False)
 '''df_get_dummies SITE_TYPE, STATE_NAME'''
 path_df_get_dummies = 'Data/df_get_dummies.csv'
 df_get_dummies = pd.read_csv(path_df_get_dummies, low_memory=False)
-
 df = pd.concat([df, df_get_dummies], axis=1)
 
-# df = df[df['STATE_NAME'] == 'Rajasthan']
 
-df = df[~df['FLUORIDE'].isna()]
+''' Division by regions'''
+country_list_of_dakan = ['Andhra Pradesh', 'Dadra And Nagar Haveli', 'Goa', 'Karnataka',
+                        'Kerala', 'Maharashtra', 'Odisha', 'Pondicherry', 'Tamil Nadu', 'Telangana',]
+country_list_of_himalayan = [ 'Arunachal Pradesh', 'Assam', 'Himachal Pradesh', 'Jammu And Kashmir',
+                            'Meghalaya', 'Nagaland', 'Tripura', 'Uttarakhand',]
+country_list_of_lowland = [ 'Bihar', 'Chhattisgarh', 'Delhi', 'Gujarat', 'Haryana', 'Jharkhand',
+                           'Punjab', 'Rajasthan', 'Uttar Pradesh', 'West Bengal']
 
+df_dakan = df.query(f'STATE_NAME == {country_list_of_dakan}')
+df_himalayan = df.query(f'STATE_NAME == {country_list_of_himalayan}')
+df_lowland = df.query(f'STATE_NAME == {country_list_of_lowland}')
+# df = df_dakan
+# df = df_himalayan
+# df = df_lowland
+
+
+df = df[df['FLUORIDE'] < 30]  # remove the outliers
+# df = df[~df['FLUORIDE'].isna()]
 df.copy().to_csv('df for colab.csv', index=False)
 
 
@@ -35,7 +44,10 @@ class Model(nn.Module):
     def __init__(self, df):
         super().__init__()
         self.df = df
-        self.num_fetchers = len(df.columns)
+        self.X = self.df.loc[:, 'AET.tif':].copy()
+        self.X = self.X.drop(['FLUORIDE'], axis=1).fillna(0)
+        self.y = self.df['FLUORIDE'].copy()
+        self.num_fetchers = len(self.X.columns)
         self.lr, self.epochs = None, None
         self.fc1 = nn.Linear(in_features=self.num_fetchers, out_features=260)
         self.fc2 = nn.Linear(in_features=260, out_features=770)
@@ -62,14 +74,13 @@ class Model(nn.Module):
                                                                torch.tensor(self.X_test.values), \
                                                                torch.tensor(self.y_train.values).type(torch.LongTensor), \
                                                                torch.tensor(self.y_test.values).type(torch.LongTensor)
-    def split_df_to_train_test(self, threshold_a, threshold_b=None, val= False):
+
+    def split_df_to_train_test(self, threshold_a, threshold_b=None, val=False):
         self.threshold_a = threshold_a
         self.threshold_b = threshold_b
 
-        self.X = self.df.loc[:, 'AET.tif':].copy()
-        self.X = self.X.drop(['FLUORIDE'], axis=1).fillna(0)
-        self.y = self.df['FLUORIDE'].copy()
 
+        self.num_fetchers = len(self.X.columns)
         '''convert target to boolean value'''
         self.y[self.y <= self.threshold_a] = 0
         self.y[self.y > self.threshold_a] = 1
@@ -81,13 +92,14 @@ class Model(nn.Module):
         self.X = scaler.transform(self.X)
         self.X = pd.DataFrame(self.X)
 
-
-        self.X_train, self.X_test, self.y_train, self.y_test = train_test_split(self.X, self.y, test_size=0.2, random_state=42)
+        self.X_train, self.X_test, self.y_train, self.y_test = train_test_split(self.X, self.y, test_size=0.2,
+                                                                                random_state=42)
         print(unique_pd(pd.Series(self.y_test)))
         self.convert_test_train_to_torch()
         if val == True:
-            self.X_train, self.X_val, self.y_train, self.y_val = train_test_split(self.X_train, self.y_train, test_size=0.2,
-                                                                                    random_state=42)
+            self.X_train, self.X_val, self.y_train, self.y_val = train_test_split(self.X_train, self.y_train,
+                                                                                  test_size=0.2,
+                                                                                  random_state=42)
 
     def print_matrix(self, y):
         self.y_test = y
@@ -138,7 +150,6 @@ class Model(nn.Module):
                 loss_val = criterion(y_pred_val, self.y_val)
                 self.loss_arr_val.append(loss_val)
 
-
             if i % 10 == 0:
                 print(f'Epoch: {i} Loss: {loss}')
                 print(f'Loss val: {loss_val}')
@@ -146,36 +157,22 @@ class Model(nn.Module):
             optimizer.zero_grad()
             loss.backward()
             optimizer.step()
+
     def predict(self, X):
         self.preds = []
         with torch.no_grad():
-           for x in X:
-               y_pred = self.forward(x)
-               self.preds.append(y_pred.argmax().item())
+            for x in X:
+                y_pred = self.forward(x)
+                self.preds.append(y_pred.argmax().item())
         if len(self.preds) == 1:
             print(self.preds)
             return int(self.preds)
 
 
 if __name__ == "__main__":
-
     model = Model(df)
     model.split_df_to_train_test(threshold_a=0.7, val=True)
-    model.fit(lr=0.004647, epochs=5)
+    model.fit(lr=0.004647, epochs=50)
     model.predict(model.X_test)
     model.print_matrix(model.y_test)
     model.plot_loss()
-
-
-
-
-
-
-
-
-
-
-
-
-
-

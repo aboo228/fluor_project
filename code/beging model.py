@@ -27,25 +27,7 @@ df = pd.concat([df, df_get_dummies], axis=1)
 
 clf_GradientBoosting = GradientBoostingClassifier(n_estimators=100, learning_rate=0.1, max_depth=5, random_state=42)
 
-# self = ClassificationModel(df)
-# self.split_df_to_train_test(0.7)
-# self.fit(clf_GradientBoosting)
-# self.predict(self.X_test)
-# matrix = self.confusion_matrix(self.y_test)
-# self.confusion_df('STATE_NAME', to_print=True)
-#
-# model = Model(df)
-# model.split_df_to_train_test(threshold_a=0.7, val=True)
-# model.fit(lr=0.004647, epochs=5)
-# model.predict(model.X_test)
-# model.print_matrix(model.y_test)
-# model.plot_loss()
-#
-# for i, j in tqdm(enumerate(df['STATE_NAME'])):
-#     if i in country_list_of_dakan:
-#         df['dakan'].loc[j] = 1
-#     else:
-#         df['dakan'].loc[j] = 0
+
 
 
 dict_of_divided = {'dakan': country_list_of_dakan, 'himalayan': country_list_of_himalayan,
@@ -89,3 +71,25 @@ def add_dummy_columns(df, data, column_name):
 
 
 n_df = add_dummy_columns(df, dict_of_divided, 'STATE_NAME')
+
+def fit_beging_model():
+
+# self = ClassificationModel(df)
+# self.split_df_to_train_test(0.7)
+# self.fit(clf_GradientBoosting)
+# self.predict(self.X_test)
+# matrix = self.confusion_matrix(self.y_test)
+# self.confusion_df('STATE_NAME', to_print=True)
+#
+# model = Model(df)
+# model.split_df_to_train_test(threshold_a=0.7, val=True)
+# model.fit(lr=0.004647, epochs=5)
+# model.predict(model.X_test)
+# model.print_matrix(model.y_test)
+# model.plot_loss()
+#
+# for i, j in tqdm(enumerate(df['STATE_NAME'])):
+#     if i in country_list_of_dakan:
+#         df['dakan'].loc[j] = 1
+#     else:
+#         df['dakan'].loc[j] = 0

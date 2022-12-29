@@ -28,9 +28,23 @@ df_get_dummies = pd.read_csv(path_df_get_dummies, low_memory=False)
 
 df = pd.concat([df, df_get_dummies], axis=1)
 
+''' Division by regions'''
+country_list_of_dakan = ['Andhra Pradesh', 'Dadra And Nagar Haveli', 'Goa', 'Karnataka',
+                        'Kerala', 'Maharashtra', 'Odisha', 'Pondicherry', 'Tamil Nadu', 'Telangana',]
+country_list_of_himalayan = [ 'Arunachal Pradesh', 'Assam', 'Himachal Pradesh', 'Jammu And Kashmir',
+                            'Meghalaya', 'Nagaland', 'Tripura', 'Uttarakhand',]
+country_list_of_lowland = [ 'Bihar', 'Chhattisgarh', 'Delhi', 'Gujarat', 'Haryana', 'Jharkhand',
+                           'Punjab', 'Rajasthan', 'Uttar Pradesh', 'West Bengal']
 
-'''remove the outlayers'''
-df = df[df['FLUORIDE'] < 30]
+df_dakan = df.query(f'STATE_NAME == {country_list_of_dakan}')
+df_himalayan = df.query(f'STATE_NAME == {country_list_of_himalayan}')
+df_lowland = df.query(f'STATE_NAME == {country_list_of_lowland}')
+# df = df_dakan
+# df = df_himalayan
+# df = df_lowland
+
+
+df = df[df['FLUORIDE'] < 30]  # remove the outliers
 # df = df[~df['FLUORIDE'].isna()]
 
 class ClassificationModel:
