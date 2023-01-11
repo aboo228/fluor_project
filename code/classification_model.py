@@ -39,6 +39,7 @@ country_list_of_lowland = [ 'Bihar', 'Chhattisgarh', 'Delhi', 'Gujarat', 'Haryan
 df_dakan = df.query(f'STATE_NAME == {country_list_of_dakan}')
 df_himalayan = df.query(f'STATE_NAME == {country_list_of_himalayan}')
 df_lowland = df.query(f'STATE_NAME == {country_list_of_lowland}')
+df_list = [df_dakan, df_himalayan, df_lowland]
 # df = df_dakan
 # df = df_himalayan
 # df = df_lowland
@@ -114,16 +115,21 @@ class ClassificationModel:
             print(self.y_pred)
             return int(self.y_pred)
 
-    def confusion_matrix(self, y):
+    def confusion_matrix(self, y, confusionMatrix=None):
         self.y_test = y
 
-        self.confusionMatrix = confusion_matrix(self.y_test, self.y_pred)
-        true_positive, false_positive, false_negative, true_negative = self.confusionMatrix[0, 0],\
-                                                                       self.confusionMatrix[0, 1],\
-                                                                       self.confusionMatrix[1, 0],\
+        if confusionMatrix is None:
+            self.confusionMatrix = confusion_matrix(self.y_test, self.y_pred)
+        else:
+            self.confusionMatrix = confusionMatrix
+        true_positive, false_positive, false_negative, true_negative = self.confusionMatrix[0, 0], \
+                                                                       self.confusionMatrix[0, 1], \
+                                                                       self.confusionMatrix[1, 0], \
                                                                        self.confusionMatrix[1, 1]
 
-        recall = true_positive / (true_positive + false_positive)
+
+
+        recall = true_positive / (true_positive + false_negative)
         precision = true_positive / (true_positive + false_positive)
         accuracy = (true_positive + true_negative) / self.y_test.count()
         sensitivity = true_positive / (true_positive + false_negative)
@@ -135,7 +141,8 @@ class ClassificationModel:
         list_matrix = [recall, precision, accuracy, sensitivity, specificity]
         matrix = {'recall': recall, 'precision': precision,
                        'accuracy': accuracy, 'sensitivity': sensitivity, 'specificity': specificity}
-        return matrix
+        matrix = pd.DataFrame.from_dict(matrix, orient='index').T
+        return matrix, self.confusionMatrix
 
     def confusion_df(self, slice_by_feature, to_print=False):
         df_confusion = pd.concat([pd.Series(self.y_pred), self.y_test.reset_index()], axis=1)
@@ -158,7 +165,7 @@ class ClassificationModel:
 
         if to_print is True:
             print(self.confusion_df_percentage)
-            return self.confusion_df_percentage
+        return self.confusion_df_percentage
 
 
 
@@ -215,6 +222,7 @@ if __name__ == '__main__':
     self.confusion_matrix(self.y_test)
     self.confusion_df('STATE_NAME', to_print=True)
 
+'''chek difrent classifier'''
     # list_clf = [clf_GradientBoosting, clf_AdaBoost, clf_RandomForest, clf_LogisticRegression, clf_svm]
     # for clf in list_clf:
     #     print(clf)
@@ -224,6 +232,21 @@ if __name__ == '__main__':
     #     self.confusion_matrix()
     #     self.confusion_df('STATE_NAME', to_print=True)
 
+'''comparision between basice model and partitioned model  '''
+    # confusion_matrix_list = []
+    # for dataframe in tqdm(df_list):
+    #     self = ClassificationModel(dataframe)
+    #     self.split_df_to_train_test(0.7)
+    #     self.fit(clf_GradientBoosting)
+    #     self.predict(self.X_test)
+    #     m, c = self.confusion_matrix(self.y_test)
+    #     self.confusion_df('STATE_NAME', to_print=True)
+    #     confusion_matrix_list.append(c)
+    #
+    # confusion_matrix_sum = confusion_matrix_list[0] + confusion_matrix_list[1] + confusion_matrix_list[2]
+    # self = ClassificationModel(df)
+    # self.split_df_to_train_test(0.7)
+    # m, c = self.confusion_matrix(self.y_test, confusion_matrix_sum)
 
 
 

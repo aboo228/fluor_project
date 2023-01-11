@@ -67,13 +67,13 @@ df_eda.to_csv('Data/df_eda.csv', index=False)
 
 
 
-'''now we can look statistical numeric columns'''
+'''now we can see statistical numeric columns'''
 df_numeric = df.loc[:, 'PH':]
 describe = df_numeric.describe()
 corr = df_numeric.corr()
 info_null = df.count()
 
-'''this part show that most the SITE is had less then 5 instance'''
+'''this part shows that most of the SITE had less then 5 instance'''
 # unique = unique_pd(df['SITE_ID'], df['SITE_ID'])
 # unique = unique.drop('New')
 # sns.histplot(unique)
@@ -93,7 +93,7 @@ info_null = df.count()
 
 
 
-'''we can look thet amaunt of graoundwater growduring in time '''
+'''we can see that the amount of groundwater increases over time '''
 unique_pd(df.groupby('WRIS ID').count()['year'][1:])
 
 '''we sink to add new feature: fluoride t-1, so hear we can swo that no '''
@@ -101,7 +101,7 @@ df_id_per_year = df.loc[:, ['WRIS ID', 'year', 'FLUORIDE']]
 df_id_per_year_sort = df_id_per_year.sort_values(['year', 'WRIS ID'])
 df_id_per_year_std = df_id_per_year.groupby(['WRIS ID']).std()
 
-'''we can saw the difrent in fluoride growndwaters between the states '''
+'''we can see the difference between fluoride groundwater in other states '''
 
 
 df_split_column_by_column_count = df_split_column_by_column(df=df, split_column='STATE_NAME', by_column= 'year')
