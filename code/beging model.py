@@ -5,15 +5,14 @@ from classification_model import ClassificationModel
 from NN_pytorch import Model
 from sklearn.ensemble import GradientBoostingClassifier
 
-
 path = r'Data/gdf.csv'
 df = pd.read_csv(path, low_memory=False)
 
 country_list_of_dakan = ['Andhra Pradesh', 'Dadra And Nagar Haveli', 'Goa', 'Karnataka',
-                        'Kerala', 'Maharashtra', 'Odisha', 'Pondicherry', 'Tamil Nadu', 'Telangana',]
-country_list_of_himalayan = [ 'Arunachal Pradesh', 'Assam', 'Himachal Pradesh', 'Jammu And Kashmir',
-                            'Meghalaya', 'Nagaland', 'Tripura', 'Uttarakhand',]
-country_list_of_lowland = [ 'Bihar', 'Chhattisgarh', 'Delhi', 'Gujarat', 'Haryana', 'Jharkhand',
+                         'Kerala', 'Maharashtra', 'Odisha', 'Pondicherry', 'Tamil Nadu', 'Telangana', ]
+country_list_of_himalayan = ['Arunachal Pradesh', 'Assam', 'Himachal Pradesh', 'Jammu And Kashmir',
+                             'Meghalaya', 'Nagaland', 'Tripura', 'Uttarakhand', ]
+country_list_of_lowland = ['Bihar', 'Chhattisgarh', 'Delhi', 'Gujarat', 'Haryana', 'Jharkhand',
                            'Punjab', 'Rajasthan', 'Uttar Pradesh', 'West Bengal']
 
 df_dakan = df.query(f'STATE_NAME == {country_list_of_dakan}')
@@ -27,21 +26,16 @@ df = pd.concat([df, df_get_dummies], axis=1)
 
 clf_GradientBoosting = GradientBoostingClassifier(n_estimators=100, learning_rate=0.1, max_depth=5, random_state=42)
 
-
-
-
 dict_of_divided = {'dakan': country_list_of_dakan, 'himalayan': country_list_of_himalayan,
                    'lowland': country_list_of_lowland}
+
+
 # for name_countries in dict_of_divided:
 #     for i in tqdm(range(len(df['STATE_NAME']))):
 #         if i in dict_of_divided[name_countries]:
 #             df[dict_of_divided].loc[i] = 1
 #         else:
 #             df[dict_of_divided].loc[i] = 0
-
-
-
-
 
 
 def add_dummy_columns(df, data, column_name):
@@ -71,6 +65,7 @@ def add_dummy_columns(df, data, column_name):
 
 
 n_df = add_dummy_columns(df, dict_of_divided, 'STATE_NAME')
+
 
 def fit_beging_model():
 

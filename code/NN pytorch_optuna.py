@@ -11,10 +11,8 @@ import optuna
 import seaborn as sns
 import matplotlib.pyplot as plt
 
-
 device = "cuda" if torch.cuda.is_available() else "cpu"
 print(f"Using {device} device")
-
 
 path = r'Data/gdf.csv'
 df = pd.read_csv(path, low_memory=False)
@@ -44,7 +42,6 @@ class Model(nn.Module):
 
         self.dropout = nn.Dropout(p=params['dropout'])
 
-
     def forward(self, x=None):
         if x is None:
             x = self.X_train
@@ -62,7 +59,8 @@ class Model(nn.Module):
                                                                torch.tensor(self.X_test.values), \
                                                                torch.tensor(self.y_train.values).type(torch.LongTensor), \
                                                                torch.tensor(self.y_test.values).type(torch.LongTensor)
-    def split_df_to_train_test(self, threshold_a, threshold_b=None, val= False):
+
+    def split_df_to_train_test(self, threshold_a, threshold_b=None, val=False):
         self.threshold_a = threshold_a
         self.threshold_b = threshold_b
 
@@ -81,13 +79,14 @@ class Model(nn.Module):
         self.X = scaler.transform(self.X)
         self.X = pd.DataFrame(self.X)
 
-
-        self.X_train, self.X_test, self.y_train, self.y_test = train_test_split(self.X, self.y, test_size=0.2, random_state=42)
+        self.X_train, self.X_test, self.y_train, self.y_test = train_test_split(self.X, self.y, test_size=0.2,
+                                                                                random_state=42)
         print(unique_pd(pd.Series(self.y_test)))
         self.convert_test_train_to_torch()
         if val == True:
-            self.X_train, self.X_val, self.y_train, self.y_val = train_test_split(self.X_train, self.y_train, test_size=0.2,
-                                                                                    random_state=42)
+            self.X_train, self.X_val, self.y_train, self.y_val = train_test_split(self.X_train, self.y_train,
+                                                                                  test_size=0.2,
+                                                                                  random_state=42)
 
     def print_matrix(self, preds):
         df_corr = pd.DataFrame({'Y': self.y_test, 'YHat': preds})
@@ -118,21 +117,19 @@ class Model(nn.Module):
         plt.plot(loss_arr_val)
         plt.show()
 
+
 if __name__ == "__main__":
-
-
-
 
     def objective(trial):
 
         params = {
             'learning_rate': trial.suggest_float('learning_rate', low=0.0001, high=0.01),
             'optimizer': trial.suggest_categorical("optimizer", ["Adam", "RMSprop", "SGD"]),
-            'activation1' : trial.suggest_categorical('activation1', [F.leaky_relu, F.relu]),
-            'activation2' : trial.suggest_categorical('activation2', ['leaky_relu', 'relu']),
-            'activation3' : trial.suggest_categorical('activation3', ['leaky_relu', 'relu']),
-            'activation4' : trial.suggest_categorical('activation4', ['leaky_relu', 'relu']),
-            'activation5' : trial.suggest_categorical('activation5', ['leaky_relu', 'relu']),
+            'activation1': trial.suggest_categorical('activation1', [F.leaky_relu, F.relu]),
+            'activation2': trial.suggest_categorical('activation2', ['leaky_relu', 'relu']),
+            'activation3': trial.suggest_categorical('activation3', ['leaky_relu', 'relu']),
+            'activation4': trial.suggest_categorical('activation4', ['leaky_relu', 'relu']),
+            'activation5': trial.suggest_categorical('activation5', ['leaky_relu', 'relu']),
             'l1': trial.suggest_int('l1', low=10, high=280, step=10),
             'l2': trial.suggest_int('l2', low=10, high=280, step=10),
             'l3': trial.suggest_int('l3', low=10, high=280, step=10),
@@ -177,8 +174,6 @@ if __name__ == "__main__":
         specificity = model.print_matrix(preds)
 
         return specificity
-
-
 
 
     study = optuna.create_study(direction="maximize", sampler=optuna.samplers.TPESampler())

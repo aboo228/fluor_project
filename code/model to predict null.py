@@ -9,12 +9,13 @@ from sklearn.ensemble import GradientBoostingRegressor
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.model_selection import train_test_split
 from func import unique_pd, find_and_replace_not_num_values, isfloat
+
 path = r'Data/df_fill_NA.csv'
 data = pd.read_csv(path, low_memory=False)
 
 df_num = data.loc[:, ['PH', 'EC', 'TH',
-       'TOT_ALKALINITY', 'CA', 'MG', 'NA', 'K', 'CARBONATE',
-       'BICARBONATE', 'CHLORIDE', 'SULPHATE', 'NITRATE', 'FLUORIDE', 'SAR', 'RSC']]
+                      'TOT_ALKALINITY', 'CA', 'MG', 'NA', 'K', 'CARBONATE',
+                      'BICARBONATE', 'CHLORIDE', 'SULPHATE', 'NITRATE', 'FLUORIDE', 'SAR', 'RSC']]
 
 
 class PredictNull:
@@ -26,11 +27,11 @@ class PredictNull:
         self.X = pd.DataFrame(np.nan_to_num(self.X), columns=list(self.X.columns))
         self.series = series
         self.y = self.df_train[series]
-        self.X_train, self.X_test, self.y_train, self.y_test = train_test_split(self.X, self.y, test_size=0.2, random_state=42)
+        self.X_train, self.X_test, self.y_train, self.y_test = train_test_split(self.X, self.y, test_size=0.2,
+                                                                                random_state=42)
         self.model = None
         self.regressor = None
         self.prediction = None
-
 
     def grid_search_cv(self, model, parameters, predict=True):
 
@@ -58,7 +59,7 @@ class PredictNull:
     def predict(self, regressor=0):
         if regressor != 0:
             self.regressor = regressor
-        print(f'prediction of { self.series} {self.model}')
+        print(f'prediction of {self.series} {self.model}')
         print(self.regressor.score(self.X_test, self.y_test))
         self.prediction = self.regressor.predict(self.X_test)
         unique_pd(pd.Series(self.prediction))
@@ -66,7 +67,6 @@ class PredictNull:
 
         ####for classification
         self.unq = unique_pd(pd.Series(self.prediction))
-
 
     def fill_null(self):
         for i in tqdm(range(0, len(self.df[self.series]))):
@@ -77,11 +77,11 @@ class PredictNull:
 
 
 if __name__ == '__main__':
-
     '''predict to df['TH'] '''
     th_fill = PredictNull(series='TH', df=df_num)
 
-    parameters = {'max_depth': (1, 2, 3, 4, 5), 'learning_rate': (0.5, 0.1, 0.05, 0.01), 'n_estimators': (60, 70, 75, 80, 85, 90, 100)}
+    parameters = {'max_depth': (1, 2, 3, 4, 5), 'learning_rate': (0.5, 0.1, 0.05, 0.01),
+                  'n_estimators': (60, 70, 75, 80, 85, 90, 100)}
     th_reg_gb = th_fill.grid_search_cv('GradientBoostingRegressor', parameters, predict=True)
 
     parameters = {'learning_rate': (0.5, 0.1, 0.05), 'n_estimators': (60, 70, 80, 90, 100)}
@@ -89,7 +89,6 @@ if __name__ == '__main__':
 
     parameters = {'max_depth': (3, 4, 5), 'n_estimators': (60, 70, 80, 90, 100)}
     th_reg_rf = th_fill.grid_search_cv('RandomForestRegressor', parameters, predict=True)
-
 
     '''fill null in TH column'''
     # # {'learning_rate': 0.5, 'max_depth': 4, 'n_estimators': 100}

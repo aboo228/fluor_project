@@ -6,7 +6,6 @@ from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
 import matplotlib.pyplot as plt
 
-
 device = "cuda" if torch.cuda.is_available() else "cpu"
 print(f"Using {device} device")
 
@@ -18,13 +17,12 @@ path_df_get_dummies = 'Data/df_get_dummies.csv'
 df_get_dummies = pd.read_csv(path_df_get_dummies, low_memory=False)
 df = pd.concat([df, df_get_dummies], axis=1)
 
-
 ''' Division by regions'''
 country_list_of_dakan = ['Andhra Pradesh', 'Dadra And Nagar Haveli', 'Goa', 'Karnataka',
-                        'Kerala', 'Maharashtra', 'Odisha', 'Pondicherry', 'Tamil Nadu', 'Telangana',]
-country_list_of_himalayan = [ 'Arunachal Pradesh', 'Assam', 'Himachal Pradesh', 'Jammu And Kashmir',
-                            'Meghalaya', 'Nagaland', 'Tripura', 'Uttarakhand',]
-country_list_of_lowland = [ 'Bihar', 'Chhattisgarh', 'Delhi', 'Gujarat', 'Haryana', 'Jharkhand',
+                         'Kerala', 'Maharashtra', 'Odisha', 'Pondicherry', 'Tamil Nadu', 'Telangana', ]
+country_list_of_himalayan = ['Arunachal Pradesh', 'Assam', 'Himachal Pradesh', 'Jammu And Kashmir',
+                             'Meghalaya', 'Nagaland', 'Tripura', 'Uttarakhand', ]
+country_list_of_lowland = ['Bihar', 'Chhattisgarh', 'Delhi', 'Gujarat', 'Haryana', 'Jharkhand',
                            'Punjab', 'Rajasthan', 'Uttar Pradesh', 'West Bengal']
 
 df_dakan = df.query(f'STATE_NAME == {country_list_of_dakan}')
@@ -37,7 +35,7 @@ df_lowland = df.query(f'STATE_NAME == {country_list_of_lowland}')
 
 df = df[df['FLUORIDE'] < 30]  # remove the outliers
 # df = df[~df['FLUORIDE'].isna()]
-df.copy().to_csv('df for colab.csv', index=False)
+# df.copy().to_csv('df for colab.csv', index=False)
 
 
 class Model(nn.Module):
@@ -78,7 +76,6 @@ class Model(nn.Module):
     def split_df_to_train_test(self, threshold_a, threshold_b=None, val=False):
         self.threshold_a = threshold_a
         self.threshold_b = threshold_b
-
 
         self.num_fetchers = len(self.X.columns)
         '''convert target to boolean value'''
