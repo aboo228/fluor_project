@@ -61,25 +61,38 @@ class ClassificationModel:
         self.confusion_df_percentage = None
 
     def split_df_to_train_test(self, threshold_a, threshold_b=None):
+
+        # Assign threshold values to class variables
         self.threshold_a = threshold_a
         self.threshold_b = threshold_b
 
+        # Copy selected columns from dataframe to create 'X' and 'y'
         self.X = self.df.loc[:, 'AET.tif':].copy()
         self.X = self.X.drop(['FLUORIDE'], axis=1).fillna(0)
         self.y = self.df['FLUORIDE'].copy()
 
-        '''convert target to boolean value'''
-        self.y[self.y <= self.threshold_a] = 0
-        self.y[self.y > self.threshold_a] = 1
-        # self.y[self.y.between(self.threshold_a, self.threshold_b, inclusive='right')] = 1
-        # self.y[self.y > 2] = self.threshold_b
+        # Convert target column 'y' to boolean values using threshold_a
+        self.y[self.y <= threshold_a] = 0
+        self.y[self.y > threshold_a] = 1
         self.y = self.y.astype('int')
 
+        # Split dataframe into train and test sets
         self.X_train, self.X_test, self.y_train, self.y_test = train_test_split(self.X, self.y,
                                                                                 test_size=0.2, random_state=42,
                                                                                 stratify=self.y, shuffle=True)
-        print(unique_pd(self.y_test))
+        self.X_train, self.y_train = self.scaling_up()
+
+
         return self.X_train, self.X_test, self.y_train, self.y_test
+    def scaling_up(self):
+        from imblearn.under_sampling import NearMiss
+
+        nr = NearMiss(version=2, n_neighbors=3, n_neighbors_ver3=3)
+        X_res, y_res = nr.fit_resample(self.X_train, self.y_train)
+
+        self.X_train, self.y_train = X_res, y_res
+        return self.X_train, self.y_train
+
 
     def split_df_by_state(self, state, threshold_a):
         '''
@@ -109,41 +122,46 @@ class ClassificationModel:
 
     def predict(self, X):
         self.y_pred = self.clf.predict(X)
-        unique_pd(pd.Series(self.y_pred))
-        if len(X) > 1:
-            unique_y_pred = unique_pd(pd.Series(self.y_pred))
-            print(f'{unique_y_pred[0]} under the threshold\n{unique_y_pred[1]} above the threshold')
+        counts = pd.Series(self.y_pred).value_counts()
+        if len(counts) > 1:
+            print(f'{counts[0]} under the threshold\n{counts[1]} above the threshold\n')
             self.X_test = X
-        elif len(X) == 1:
+        elif len(counts) == 1:
             print(self.y_pred)
-            return int(self.y_pred)
+        return self.y_pred
 
-    def confusion_matrix(self, y, confusionMatrix=None):
+    def confusion_matrix(self, y, confusionMatrix=None):  # calculate_confusion_matrix
         self.y_test = y
-
         if confusionMatrix is None:
             self.confusionMatrix = confusion_matrix(self.y_test, self.y_pred)
         else:
             self.confusionMatrix = confusionMatrix
-        true_positive, false_positive, false_negative, true_negative = self.confusionMatrix[0, 0], \
-                                                                       self.confusionMatrix[0, 1], \
-                                                                       self.confusionMatrix[1, 0], \
-                                                                       self.confusionMatrix[1, 1]
 
-        recall = true_positive / (true_positive + false_negative)
-        precision = true_positive / (true_positive + false_positive)
-        accuracy = (true_positive + true_negative) / self.y_test.count()
-        sensitivity = true_positive / (true_positive + false_negative)
-        specificity = true_negative / (true_negative + false_positive)
-        print(f'recall is {"{:.2%}".format(recall)}\nprecision is {"{:.2%}".format(precision)}'
-              f'\naccuracy is {"{:.2%}".format(accuracy)}\nSensitivity is {"{:.2%}".format(sensitivity)}'
-              f'\nSpecificity is {"{:.2%}".format(specificity)}')
-        print(f'\n{self.confusionMatrix}')
-        list_matrix = [recall, precision, accuracy, sensitivity, specificity]
-        matrix = {'recall': recall, 'precision': precision,
-                  'accuracy': accuracy, 'sensitivity': sensitivity, 'specificity': specificity}
+        tp, fp, fn, tn = self.confusionMatrix.ravel()
+
+        recall = tp / (tp + fn)
+        precision = tp / (tp + fp)
+        accuracy = (tp + tn) / self.y_test.count()
+        sensitivity = recall
+        specificity = tn / (tn + fp)
+        f1_score = 2 * (specificity * recall) / (specificity + recall)
+
+        matrix = {'recall': recall, 'precision': precision, 'accuracy': accuracy, 'sensitivity': sensitivity,
+                  'specificity': specificity, 'f1_score': f1_score}
         matrix = pd.DataFrame.from_dict(matrix, orient='index').T
+        self.print_metrics(matrix)
+
         return matrix, self.confusionMatrix
+
+    def print_metrics(self, matrix):
+        print(
+            f'recall is {"{:.2%}".format(matrix["recall"][0])}'
+            f'\nprecision is {"{:.2%}".format(matrix["precision"][0])}'
+            f'\naccuracy is {"{:.2%}".format(matrix["accuracy"][0])}'
+            f'\nSensitivity is {"{:.2%}".format(matrix["sensitivity"][0])}'
+            f'\nSpecificity is {"{:.2%}".format(matrix["specificity"][0])}'
+            f'\nF1 score is {"{:.2%}".format(matrix["f1_score"][0])}')
+        print(f'\n{self.confusionMatrix}')
 
     def confusion_df(self, slice_by_feature, to_print=False):
         df_confusion = pd.concat([pd.Series(self.y_pred), self.y_test.reset_index()], axis=1)
@@ -164,6 +182,8 @@ class ClassificationModel:
         self.confusion_df_percentage = pd.concat([series_percentage, unique_pd(df_slice_by_index[slice_by_feature])],
                                                  axis=1)
         self.confusion_df_percentage.rename(columns={"STATE_NAME": "Count state"}, inplace=True)
+
+
 
         if to_print is True:
             print(self.confusion_df_percentage)
@@ -196,14 +216,43 @@ if __name__ == '__main__':
     print('start')
 
     '''GridSearchCV'''
-    RandomForest = RandomForestClassifier(random_state=0)
-    GradientBoosting = GradientBoostingClassifier(random_state=42)
-    parameters = {'max_depth': (2, 3, 4, 5), 'n_estimators': (60, 80, 100, 150, 200, 250)}
-    clf = GridSearchCV(RandomForest, parameters, verbose=3)
+    # RandomForest = RandomForestClassifier(random_state=0)
+    # GradientBoosting = GradientBoostingClassifier(random_state=42)
+    # parameters = {'max_depth': (2, 3, 4, 5), 'n_estimators': (60, 80, 100, 150, 200, 250)}
+    # clf = GridSearchCV(RandomForest, parameters, verbose=3)
 
-    '''list of Classifiers'''
-    '''clf.best_params_ to GradientBoosting {'learning_rate': 0.1, 'max_depth': 5, 'n_estimators': 100}'''
 
+
+    clf_GradientBoosting = GradientBoostingClassifier(n_estimators=100, learning_rate=0.1, max_depth=5, random_state=42)
+
+    self = ClassificationModel(df)
+    self.split_df_to_train_test(0.7)
+    self.fit(clf_GradientBoosting)
+    self.predict(self.X_test)
+    self.confusion_matrix(self.y_test)
+    self.confusion_df('STATE_NAME', to_print=True)
+
+
+def compare_model(self, clf, to_print=False):
+    self.fit(clf)
+    self.predict(self.X_test)
+    self.confusion_matrix(self.y_test)
+    self.confusion_df('STATE_NAME', to_print=to_print)
+    return self.confusion_df_percentage
+
+
+# create function to compare between dataframe of confusion_df_percentage the function gets list_of_confusion_df for all clf, the function return 2 dataframe
+# one dataframe concat the "Count confusion state" columns and  the second concat"P of confusion" columns
+
+def compare_confusion_df(list_of_confusion_df, classifiers_name):
+    list_of_confusion_df = [df for df in list_of_confusion_df]
+    df_count_confusion_state = pd.concat([df['Count confusion state'] for df in list_of_confusion_df], axis=1)
+    df_count_confusion_state.columns = [f'Count confusion state {clf}' for clf in classifiers_name]
+    df_p_confusion = pd.concat([df['P of confusion'] for df in list_of_confusion_df], axis=1)
+    df_p_confusion.columns = [f'P of confusion {clf}' for clf in classifiers_name]
+    return df_count_confusion_state.T, df_p_confusion.T
+
+def define_clf():
     clf_GradientBoosting = GradientBoostingClassifier(n_estimators=100, learning_rate=0.1, max_depth=5, random_state=42)
     clf_AdaBoost = AdaBoostClassifier(n_estimators=100, learning_rate=0.1, random_state=42)
     clf_RandomForest = RandomForestClassifier(max_depth=4, n_estimators=150, random_state=0)
@@ -211,35 +260,21 @@ if __name__ == '__main__':
     clf_LogisticRegression = LogisticRegression(random_state=0)
     clf_svm = make_pipeline(StandardScaler(), SVC(gamma='auto'))
     clf_xgb = XGBClassifier(n_estimators=100, max_depth=5, eta=0.1)
-    list_of_Classifiers = [clf_GradientBoosting, clf_AdaBoost, clf_RandomForest, clf_ExtraTrees, clf_LogisticRegression,
-                           clf_svm, clf_xgb]
+    list_of_Classifiers = [clf_GradientBoosting, clf_AdaBoost, clf_RandomForest, clf_ExtraTrees, clf_xgb]
+    classifiers_name = ["clf_GradientBoosting", "clf_AdaBoost", "clf_RandomForest", "clf_ExtraTrees", "clf_xgb"]
+    return list_of_Classifiers, classifiers_name
 
-    self = ClassificationModel(df)
-    self.split_df_to_train_test(0.7)
-    # self.fit(clf_GradientBoosting)
-    # self.predict(self.X_test)
-    # self.confusion_matrix(self.y_test)
-    # self.confusion_df('STATE_NAME', to_print=True)
-
-list_of_confusion_df = []
-for i in list_of_Classifiers:
-    self.fit(clf_GradientBoosting)
-    self.predict(self.X_test)
-    self.confusion_matrix(self.y_test)
-    _ = self.confusion_df('STATE_NAME', to_print=True)
-    list_of_confusion_df.append(_.copy())
-
-'''chek difrent classifier'''
-# list_clf = [clf_GradientBoosting, clf_AdaBoost, clf_RandomForest, clf_LogisticRegression, clf_svm]
-# for clf in list_clf:
-#     print(clf)
-#     self = ClassificationModel(df)
-#     self.split_df_to_train_test(0.7)
-#     self.fit_and_predict(clf)
-#     self.confusion_matrix()
-#     self.confusion_df('STATE_NAME', to_print=True)
-
+# list_of_Classifiers, classifiers_name = define_clf()
+# list_of_confusion_df = []
+# for i in list_of_Classifiers:
+#     _ = compare_model(self, i)
+#     list_of_confusion_df.append(_.copy())
+# df_count_confusion_state, df_p_confusion = compare_confusion_df(list_of_confusion_df, classifiers_name)
+# print(df_count_confusion_state, df_p_confusion)
 '''comparision between basice model and partitioned model  '''
+
+
+
 # confusion_matrix_list = []
 # for dataframe in tqdm(df_list):
 #     self = ClassificationModel(dataframe)
@@ -249,7 +284,7 @@ for i in list_of_Classifiers:
 #     m, c = self.confusion_matrix(self.y_test)
 #     self.confusion_df('STATE_NAME', to_print=True)
 #     confusion_matrix_list.append(c)
-#
+
 # confusion_matrix_sum = confusion_matrix_list[0] + confusion_matrix_list[1] + confusion_matrix_list[2]
 # self = ClassificationModel(df)
 # self.split_df_to_train_test(0.7)

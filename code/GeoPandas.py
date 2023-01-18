@@ -55,7 +55,3 @@ df_marge.copy().to_csv('Data/gdf.csv', index=False)
 
 print('end')
 
-
-
-
-

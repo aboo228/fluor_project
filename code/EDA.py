@@ -17,41 +17,37 @@ df = pd.concat([df_A, df_B], axis=0)
 
 df.reset_index(inplace=True)
 
-df['RSC'].replace([' ', '#REF!', '#VALUE!', 'ND'], None, inplace=True)
-df['STATE_NAME'][df['STATE_NAME'] == 'Uttarakhand '].replace('Uttarakhand', inplace=True)
-df['SITE_TYPE'].replace(['DW', 'D.W.', 'Dug well', ' Dug Well', 'dug', 'Dugwell', 'DUGWWELL', 'Dug', 'DUG',
-                         'WELL', 'D/W', 'Dug Welll', 'Dug ', 'DUG WELL', 'DCB', 'Mark II ', 'CGWB SPZ'],
-                        'Dug Well', inplace=True)
-df['SITE_TYPE'].replace(['MONITORING'], 'Monitoring', inplace=True)
-df['SITE_TYPE'].replace(['BOREWELL', 'BW', 'BW '], 'Bore Well', inplace=True)
-df['SITE_TYPE'].replace(['TW', 'T/W', 'CYL. TW', 'T.W', ' TW'], 'Tube Well', inplace=True)
-df['SITE_TYPE'].replace(['H/P', 'H.P', 'HP', 'Hand pump'], 'Hand Pump', inplace=True)
-df['SITE_TYPE'].replace(['Mark II', 'markII', 'markII', 'Mark II '], 'Mark-II', inplace=True)
-df['SITE_TYPE'].replace(['Cylindrical '], 'Cylindrical', inplace=True)
-df['SITE_TYPE'].replace(['PZ'], 'Pz', inplace=True)
-df['SITE_TYPE'].replace(['STW'], 'Sub T.W.', inplace=True)
-df['SITE_TYPE'].replace(['TW M-II', 'Tw Mark-II', 'Mark-II T.W.', 'TW Mark-II', 'T.W.', 'Tw', 'markII TW',
-                         'TW MK-II', 'Twmark-II''Mrk II', 'Stw', 'Submersible TW', 'TW ', 'Mark-II TW',
-                         'TW mark II', 'T.W. Mark-II', 'MARK-II', 'Mark-II Tw', 'Mark-Il', 'SEW', 'Sub T.W',
-                         'TIRUVALLUR'
-                            , 'Twmark-II', 'Mrk II'], 'TW Mark II', inplace=True)
+replace_dict = {'RSC': [' ', '#REF!', '#VALUE!', 'ND'],
+                'STATE_NAME': {'Uttarakhand ': 'Uttarakhand',
+                               'Daman & Diu': 'Dadra And Nagar Haveli',
+                               'Chandigarh': 'Punjab'},
+                'SITE_TYPE': {'DW': 'Dug Well', 'D.W.': 'Dug Well', 'Dug well': 'Dug Well', ' Dug Well': 'Dug Well', 'dug': 'Dug Well', 'Dugwell': 'Dug Well',
+                              'DUGWWELL': 'Dug Well', 'Dug': 'Dug Well', 'DUG': 'Dug Well', 'WELL': 'Dug Well', 'D/W': 'Dug Well', 'Dug Welll': 'Dug Well',
+                              'Dug ': 'Dug Well', 'DUG WELL': 'Dug Well', 'DCB': 'Dug Well', 'Mark II ': 'Dug Well', 'CGWB SPZ': 'Dug Well',
+                              'MONITORING': 'Monitoring', 'BOREWELL': 'Bore Well', 'BW': 'Bore Well', 'BW ': 'Bore Well', 'TW': 'Tube Well', 'T/W': 'Tube Well',
+                              'CYL. TW': 'Tube Well', 'T.W': 'Tube Well', ' TW': 'Tube Well', 'H/P': 'Hand Pump', 'H.P': 'Hand Pump', 'HP': 'Hand Pump', 'Hand pump': 'Hand Pump',
+                              'Mark II': 'Mark-II', 'markII': 'Mark-II', 'Cylindrical ': 'Cylindrical', 'PZ': 'Pz', 'STW': 'Sub T.W.', 'TW M-II': 'TW Mark II',
+                              'Tw Mark-II': 'TW Mark II', 'Mark-II T.W.': 'TW Mark II', 'TW Mark-II': 'TW Mark II', 'T.W.': 'TW Mark II', 'Tw': 'TW Mark II',
+                              'markII TW': 'TW Mark II', 'TW MK-II': 'TW Mark II', 'Twmark-II': 'TW Mark II', 'Mrk II': 'TW Mark II', 'Stw': 'TW Mark II',
+                              'Submersible TW': 'TW Mark II', 'TW ': 'TW Mark II', 'Mark-II TW': 'TW Mark II', 'TW mark II': 'TW Mark II', 'T.W. Mark-II': 'TW Mark II',
+                              'MARK-II': 'TW Mark II', 'Mark-II Tw': 'TW Mark II', 'Mark-Il': 'TW Mark II', 'SEW': 'TW Mark II', 'Sub T.W': 'TW Mark II', 'TIRUVALLUR': 'TW Mark II'}}
 
-df['STATE_NAME'].replace(['Uttarakhand '], 'Uttarakhand', inplace=True)
-df['STATE_NAME'].replace(['Daman & Diu'], 'Dadra And Nagar Haveli', inplace=True)
-df['STATE_NAME'].replace(['Chandigarh'], 'Punjab', inplace=True)
+for col, replacement in replace_dict.items():
+    if isinstance(replacement, dict):
+        df[col].replace(replacement, inplace=True)
+    else:
+        df[col].replace(None, inplace=True)
 
-'''we choose drop the columns that precent the null high from 70% '''
-df.drop(['FE', 'SiO2', 'PO4', 'TDS', 'Turbidity', '%Na', 'Arsenic', 'LR. No'], axis=1, inplace=True)
 
-columns = ['PH', 'EC', 'TH',
-           'TOT_ALKALINITY', 'CA', 'MG', 'NA', 'K', 'CARBONATE',
-           'BICARBONATE', 'CHLORIDE', 'SULPHATE', 'NITRATE', 'FLUORIDE', 'SAR', 'RSC']
+high_null_cols = ['FE', 'SiO2', 'PO4', 'TDS', 'Turbidity', '%Na', 'Arsenic', 'LR. No']
+df.drop(high_null_cols, axis=1, inplace=True)
 
-'''this part we fix the numrical columns'''
-for col in columns:
-    df[col].replace(['-', '<5', '<1', 'B', '*'], None, inplace=True)
-    df[col], _ = find_and_replace_not_num_values(df[col], replace_to=None, inplace=True, astype=True, lops=True,
-                                                 list_values=True)
+num_cols = ['PH', 'EC', 'TH', 'TOT_ALKALINITY', 'CA', 'MG', 'NA', 'K', 'CARBONATE', 'BICARBONATE', 'CHLORIDE', 'SULPHATE', 'NITRATE', 'FLUORIDE', 'SAR', 'RSC']
+replace_values = ['-', '<5', '<1', 'B', '*']
+
+df[num_cols] = df[num_cols].replace(replace_values, np.nan)
+df[num_cols] = df[num_cols].apply(pd.to_numeric, errors='coerce')
+
 
 df_get_dummies = pd.get_dummies(df.loc[:, ['SITE_TYPE', 'STATE_NAME']], columns=['SITE_TYPE', 'STATE_NAME'])
 df_get_dummies = df_get_dummies.copy()
