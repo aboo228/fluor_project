@@ -80,14 +80,20 @@ def predict_null(series, predict_func, data):
 
 
 
+# def df_split_column_by_column(df,split_column, by_column):
+#     df_split_column_by_column = pd.DataFrame()
+#     for i in tqdm(list(set(df[by_column]))):
+#         _ = df.loc[:, [by_column, split_column]][df[by_column] == i].groupby(split_column).count().sort_index()
+#         df_split_column_by_column = pd.concat([df_split_column_by_column, _], axis=1)
+#         df_split_column_by_column.rename(columns={by_column: i}, inplace=True)
+#     column_count = df.loc[:, [split_column, by_column]].groupby([split_column]).count()
+#     column_count.rename(columns={by_column: 'count'}, inplace=True)
+#     fluoride_groupby_state = df.loc[:, [split_column, 'FLUORIDE']].groupby([split_column]).mean()
+#     df_split_column_by_column_count = pd.concat([fluoride_groupby_state, column_count, df_split_column_by_column], axis=1)
+#     return df_split_column_by_column_count
+
 def df_split_column_by_column(df,split_column, by_column):
-    df_split_column_by_column = pd.DataFrame()
-    for i in tqdm(list(set(df[by_column]))):
-        _ = df.loc[:, [by_column, split_column]][df[by_column] == i].groupby(split_column).count().sort_index()
-        df_split_column_by_column = pd.concat([df_split_column_by_column, _], axis=1)
-        df_split_column_by_column.rename(columns={by_column: i}, inplace=True)
-    column_count = df.loc[:, [split_column, by_column]].groupby([split_column]).count()
-    column_count.rename(columns={by_column: 'count'}, inplace=True)
-    fluoride_groupby_state = df.loc[:, [split_column, 'FLUORIDE']].groupby([split_column]).mean()
-    df_split_column_by_column_count = pd.concat([fluoride_groupby_state, column_count, df_split_column_by_column], axis=1)
+    df_split_column_by_column = df.groupby([split_column, by_column]).size().unstack()
+    df_split_column_by_column_count = df.groupby([split_column]).agg({'FLUORIDE': 'mean', by_column: 'count'})
+    df_split_column_by_column_count.rename(columns={by_column: 'count'}, inplace=True)
     return df_split_column_by_column_count

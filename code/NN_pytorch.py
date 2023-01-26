@@ -34,7 +34,6 @@ df_lowland = df.query(f'STATE_NAME == {country_list_of_lowland}')
 
 
 df = df[df['FLUORIDE'] < 30]  # remove the outliers
-# df = df[~df['FLUORIDE'].isna()]
 # df.copy().to_csv('df for colab.csv', index=False)
 
 
@@ -97,6 +96,7 @@ class Model(nn.Module):
             self.X_train, self.X_val, self.y_train, self.y_val = train_test_split(self.X_train, self.y_train,
                                                                                   test_size=0.2,
                                                                                   random_state=42)
+
 
     def print_matrix(self, y):
         self.y_test = y
@@ -162,8 +162,8 @@ class Model(nn.Module):
                 y_pred = self.forward(x)
                 self.preds.append(y_pred.argmax().item())
         if len(self.preds) == 1:
-            print(self.preds)
-            return int(self.preds)
+            # print(self.preds)
+            return self.preds[0]
 
 
 if __name__ == "__main__":

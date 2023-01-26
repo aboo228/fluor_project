@@ -18,6 +18,7 @@ from sklearn.metrics import confusion_matrix
 from sklearn.svm import SVC
 from sklearn.pipeline import make_pipeline
 from sklearn.preprocessing import StandardScaler
+from sklearn.preprocessing import MinMaxScaler
 
 path = r'Data/gdf.csv'
 df = pd.read_csv(path, low_memory=False)
@@ -46,6 +47,8 @@ df_list = [df_dakan, df_himalayan, df_lowland]
 
 
 df = df[df['FLUORIDE'] < 30]  # remove the outliers
+# df = df[df['FLUORIDE'] > 0.01]  # remove the outliers
+
 
 
 # df = df[~df['FLUORIDE'].isna()]
@@ -60,7 +63,7 @@ class ClassificationModel:
         self.confusionMatrix = None
         self.confusion_df_percentage = None
 
-    def split_df_to_train_test(self, threshold_a, threshold_b=None):
+    def split_df_to_train_test(self, threshold_a, threshold_b=None, scale_up=None,technique_scale=None):
 
         # Assign threshold values to class variables
         self.threshold_a = threshold_a
@@ -80,19 +83,45 @@ class ClassificationModel:
         self.X_train, self.X_test, self.y_train, self.y_test = train_test_split(self.X, self.y,
                                                                                 test_size=0.2, random_state=42,
                                                                                 stratify=self.y, shuffle=True)
-        self.X_train, self.y_train = self.scaling_up()
+        if technique_scale == 'standard':
+            self.X_train = StandardScaler().fit_transform(self.X_train)
+            self.X_test = StandardScaler().fit_transform(self.X_test)
+        elif technique_scale == 'minmax':
+            self.X_train = MinMaxScaler().fit_transform(self.X_train)
+            self.X_test = MinMaxScaler().fit_transform(self.X_test)
+        else:
+            pass
+
+        if scale_up is not None:
+            self.X_train, self.y_train = self.scaling_up(technique=scale_up)
 
 
         return self.X_train, self.X_test, self.y_train, self.y_test
-    def scaling_up(self):
-        from imblearn.under_sampling import NearMiss
 
-        nr = NearMiss(version=2, n_neighbors=3, n_neighbors_ver3=3)
-        X_res, y_res = nr.fit_resample(self.X_train, self.y_train)
+    def scaling_up(self, technique='SMOTE'):
+        from imblearn.over_sampling import SMOTE, RandomOverSampler, ADASYN
+        from imblearn.under_sampling import RandomUnderSampler, NearMiss
+        X_train, y_train = self.X_train, self.y_train
 
-        self.X_train, self.y_train = X_res, y_res
-        return self.X_train, self.y_train
-
+        if technique == 'SMOTE':
+            sm = SMOTE(random_state=12)
+            X_res, y_res = sm.fit_resample(X_train, y_train)
+        elif technique == 'RandomUnderSampler':
+            rus = RandomUnderSampler(random_state=42)
+            X_res, y_res = rus.fit_resample(X_train, y_train)
+        elif technique == 'NearMiss':
+            nr = NearMiss(version=2, n_neighbors=3, n_neighbors_ver3=3, random_state=42)
+            X_res, y_res = nr.fit_resample(X_train, y_train)
+        elif technique == 'RandomOverSampler':
+            ros = RandomOverSampler(random_state=42)
+            X_res, y_res = ros.fit_resample(X_train, y_train)
+        elif technique == 'AdaptiveSynthetic':
+            adasyn = ADASYN(random_state=42)
+            X_res, y_res = adasyn.fit_resample(X_train, y_train)
+        else:
+            raise ValueError(
+                "Invalid technique. Please choose from 'SMOTE', 'RandomUnderSampler', 'NearMiss', 'RandomOverSampler' , 'AdaptiveSynthetic'")
+        return X_res, y_res
 
     def split_df_by_state(self, state, threshold_a):
         '''
@@ -127,7 +156,7 @@ class ClassificationModel:
             print(f'{counts[0]} under the threshold\n{counts[1]} above the threshold\n')
             self.X_test = X
         elif len(counts) == 1:
-            print(self.y_pred)
+            return int(self.y_pred)
         return self.y_pred
 
     def confusion_matrix(self, y, confusionMatrix=None):  # calculate_confusion_matrix
@@ -182,6 +211,7 @@ class ClassificationModel:
         self.confusion_df_percentage = pd.concat([series_percentage, unique_pd(df_slice_by_index[slice_by_feature])],
                                                  axis=1)
         self.confusion_df_percentage.rename(columns={"STATE_NAME": "Count state"}, inplace=True)
+        self.confusion_df_percentage.sort_values(by=['P of confusion'], inplace=True)
 
 
 
@@ -232,6 +262,20 @@ if __name__ == '__main__':
     self.confusion_matrix(self.y_test)
     self.confusion_df('STATE_NAME', to_print=True)
 
+'''chack scale up techniques'''
+    # techniques = ['SMOTE', 'RandomUnderSampler', 'RandomOverSampler', 'AdaptiveSynthetic']
+    # list_cun = []
+    # list_cun.append(self.confusion_df_percentage['P of confusion'].rename('P basic'))
+    # list_cun.append(self.confusion_df_percentage['Count state'].rename('Count basic'))
+    # for  technique in techniques:
+    #
+    #     self.split_df_to_train_test(0.7, scale_up=technique)
+    #     self.fit(clf_GradientBoosting)
+    #     self.predict(self.X_test)
+    #     self.confusion_matrix(self.y_test)
+    #     _ = self.confusion_df('STATE_NAME')
+    #     list_cun.append(_['P of confusion'].rename(technique))
+    # df_scale_up = pd.concat(list_cun, axis=1)
 
 def compare_model(self, clf, to_print=False):
     self.fit(clf)
@@ -239,6 +283,7 @@ def compare_model(self, clf, to_print=False):
     self.confusion_matrix(self.y_test)
     self.confusion_df('STATE_NAME', to_print=to_print)
     return self.confusion_df_percentage
+
 
 
 # create function to compare between dataframe of confusion_df_percentage the function gets list_of_confusion_df for all clf, the function return 2 dataframe
