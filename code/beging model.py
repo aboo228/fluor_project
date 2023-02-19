@@ -12,8 +12,9 @@ import joblib
 path = r'Data/gdf.csv'
 df = pd.read_csv(path, low_memory=False)
 
-
-# df = df_himalayan
+_, df_short = train_test_split(df, test_size=0.1, random_state=42, shuffle=True, stratify=df['STATE_NAME'])
+df_short = df_short.reset_index(drop=True)
+# df = df_short
 
 df = df[df['FLUORIDE'] < 30]  # remove the outliers
 df_get_dummies = pd.get_dummies(df.loc[:, ['SITE_TYPE', 'STATE_NAME']], columns=['SITE_TYPE', 'STATE_NAME'])
@@ -82,9 +83,10 @@ def predict_sample(sample, df, clf_model=None, nn_model=None, first_run=True, na
         nn_model.fit(lr=0.004647, epochs=60)
         joblib.dump(clf_model, f'clf_model_{name_model}.joblib')
         joblib.dump(nn_model, f'nn_model_{name_model}.joblib')
-    else:
+    elif nn_model is None and clf_model is None:
         clf_model = joblib.load(f'clf_model_{name_model}.joblib')
         nn_model = joblib.load(f'nn_model_{name_model}.joblib')
+
     sample = convert(sample)
     clf_pred = clf_model.predict(sample)
     sample = torch.tensor(sample.values).type('torch.FloatTensor')
@@ -164,16 +166,59 @@ def predict_model(df, df_dict):
             other += 1
             predictions.append(pred)
 
-    return predict_accuracy(y_test, predictions)
+    accuracy = predict_accuracy(y_test, predictions)
+    print(f'accuracy: {accuracy}')
+    return accuracy
 
 def predict_accuracy(y_test, predictions):
       # function that recive predict list and return accuracy
    y_pred = []
-   for i in range(len(predictions)):
+   for i in range(0, len(predictions)):
         y_pred.append(predictions[i][0])
    y_pred = np.array(y_pred)
+   y_test = convert_to_binary(y_test, 0.7)
    return accuracy_score(y_test, y_pred)
 
+def convert_to_binary(series, threshold):
+    series[series <= threshold] = 0
+    series[series > threshold] = 1
+    series = series.astype('int')
+    return series
+
+
+
+# function that recive recall,precision, f1 and accuracy specificity, and print them
+def confusion_matrix( y, confusionMatrix=None):  # calculate_confusion_matrix
+    y_test = y
+    if confusionMatrix is None:
+        confusionMatrix = confusion_matrix(y_test, y_pred)
+    else:
+        confusionMatrix = confusionMatrix
+
+    tp, fp, fn, tn = confusionMatrix.ravel()
+
+    recall = tp / (tp + fn)
+    precision = tp / (tp + fp)
+    accuracy = (tp + tn) / y_test.count()
+    sensitivity = recall
+    specificity = tn / (tn + fp)
+    f1_score = 2 * (specificity * recall) / (specificity + recall)
+
+    matrix = {'recall': recall, 'precision': precision, 'accuracy': accuracy, 'sensitivity': sensitivity,
+                  'specificity': specificity, 'f1_score': f1_score}
+    matrix = pd.DataFrame.from_dict(matrix, orient='index').T
+    # print_metrics(matrix)
+    return matrix, confusionMatrix
+
+def print_metrics(self, matrix):
+    print(
+        f'recall is {"{:.2%}".format(matrix["recall"][0])}'
+        f'\nprecision is {"{:.2%}".format(matrix["precision"][0])}'
+        f'\naccuracy is {"{:.2%}".format(matrix["accuracy"][0])}'
+        f'\nSensitivity is {"{:.2%}".format(matrix["sensitivity"][0])}'
+        f'\nSpecificity is {"{:.2%}".format(matrix["specificity"][0])}'
+        f'\nF1 score is {"{:.2%}".format(matrix["f1_score"][0])}')
+    print(f'\n{self.confusionMatrix}')
 
 
 df_dict = {'basic': df, 'dakan': df_dakan, 'himalayan': df_himalayan, 'lowland': df_lowland}
