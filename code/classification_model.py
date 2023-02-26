@@ -42,7 +42,7 @@ df_himalayan = df.query(f'STATE_NAME == {country_list_of_himalayan}')
 df_lowland = df.query(f'STATE_NAME == {country_list_of_lowland}')
 df_list = [df_dakan, df_himalayan, df_lowland]
 # df = df_dakan
-# df = df_himalayan
+df = df_himalayan
 # df = df_lowland
 
 
@@ -159,7 +159,7 @@ class ClassificationModel:
             return int(self.y_pred)
         return self.y_pred
 
-    def confusion_matrix(self, y, confusionMatrix=None):  # calculate_confusion_matrix
+    def creat_confusion_matrix(self, y, confusionMatrix=None):  # calculate_confusion_matrix
         self.y_test = y
         if confusionMatrix is None:
             self.confusionMatrix = confusion_matrix(self.y_test, self.y_pred)
@@ -178,11 +178,11 @@ class ClassificationModel:
         matrix = {'recall': recall, 'precision': precision, 'accuracy': accuracy, 'sensitivity': sensitivity,
                   'specificity': specificity, 'f1_score': f1_score}
         matrix = pd.DataFrame.from_dict(matrix, orient='index').T
-        self.print_metrics(matrix)
+        self.print_confusion_matrix(matrix)
 
         return matrix, self.confusionMatrix
 
-    def print_metrics(self, matrix):
+    def print_confusion_matrix(self, matrix):
         print(
             f'recall is {"{:.2%}".format(matrix["recall"][0])}'
             f'\nprecision is {"{:.2%}".format(matrix["precision"][0])}'
@@ -259,7 +259,7 @@ if __name__ == '__main__':
     self.split_df_to_train_test(0.7)
     self.fit(clf_GradientBoosting)
     self.predict(self.X_test)
-    self.confusion_matrix(self.y_test)
+    self.creat_confusion_matrix(self.y_test)
     self.confusion_df('STATE_NAME', to_print=True)
 
 '''chack scale up techniques'''
@@ -272,7 +272,7 @@ if __name__ == '__main__':
     #     self.split_df_to_train_test(0.7, scale_up=technique)
     #     self.fit(clf_GradientBoosting)
     #     self.predict(self.X_test)
-    #     self.confusion_matrix(self.y_test)
+    #     self.creat_confusion_matrix(self.y_test)
     #     _ = self.confusion_df('STATE_NAME')
     #     list_cun.append(_['P of confusion'].rename(technique))
     # df_scale_up = pd.concat(list_cun, axis=1)
@@ -280,7 +280,7 @@ if __name__ == '__main__':
 def compare_model(self, clf, to_print=False):
     self.fit(clf)
     self.predict(self.X_test)
-    self.confusion_matrix(self.y_test)
+    self.creat_confusion_matrix(self.y_test)
     self.confusion_df('STATE_NAME', to_print=to_print)
     return self.confusion_df_percentage
 
@@ -326,14 +326,14 @@ def define_clf():
 #     self.split_df_to_train_test(0.7)
 #     self.fit(clf_GradientBoosting)
 #     self.predict(self.X_test)
-#     m, c = self.confusion_matrix(self.y_test)
+#     m, c = self.creat_confusion_matrix(self.y_test)
 #     self.confusion_df('STATE_NAME', to_print=True)
 #     confusion_matrix_list.append(c)
 
 # confusion_matrix_sum = confusion_matrix_list[0] + confusion_matrix_list[1] + confusion_matrix_list[2]
 # self = ClassificationModel(df)
 # self.split_df_to_train_test(0.7)
-# m, c = self.confusion_matrix(self.y_test, confusion_matrix_sum)
+# m, c = self.creat_confusion_matrix(self.y_test, confusion_matrix_sum)
 
 '''runing lazypredict on data'''
 from lazypredict.Supervised import LazyRegressor

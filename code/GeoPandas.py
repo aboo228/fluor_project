@@ -52,6 +52,30 @@ for raster in feature_raster_list:
 df_marge = pd.concat([gdf.drop(df_fill_TH.columns.to_list(), axis=1), df_fill_TH], axis=1)
 df_marge.copy().to_csv('Data/gdf.csv', index=False)
 
+import json
+
+def save_dict_to_file(dict_obj, file_path):
+    """
+    Saves a dictionary to a file as a JSON string.
+
+    Args:
+        dict_obj (dict): The dictionary to save.
+        file_path (str): The path to the file where the dictionary should be saved.
+    """
+    with open(file_path, 'w') as file:
+        json.dump(dict_obj, file)
+
+country_list_of_dakan = ['Andhra Pradesh', 'Dadra And Nagar Haveli', 'Goa', 'Karnataka',
+                         'Kerala', 'Maharashtra', 'Odisha', 'Pondicherry', 'Tamil Nadu', 'Telangana', ]
+country_list_of_himalayan = ['Arunachal Pradesh', 'Assam', 'Himachal Pradesh', 'Jammu And Kashmir',
+                             'Meghalaya', 'Nagaland', 'Tripura', 'Uttarakhand', ]
+country_list_of_lowland = ['Bihar', 'Chhattisgarh', 'Delhi', 'Gujarat', 'Haryana', 'Jharkhand',
+                           'Punjab', 'Rajasthan', 'Uttar Pradesh', 'West Bengal']
+dict_country_list = {'dakan': country_list_of_dakan, 'himalayan': country_list_of_himalayan,
+                   'lowland': country_list_of_lowland}
+
+save_dict_to_file(dict_country_list, 'Data/dict_country_list.json')
+
 
 print('end')
 
